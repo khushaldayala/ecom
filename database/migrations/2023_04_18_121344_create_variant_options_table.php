@@ -19,6 +19,7 @@ class CreateVariantOptionsTable extends Migration
             $table->string('option');
             $table->enum('status',['active','inactive']);
             $table->timestamps();
+            $table->timestamp('deleted_at')->nullable();
         });
     }
 

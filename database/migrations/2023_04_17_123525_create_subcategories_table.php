@@ -22,6 +22,7 @@ class CreateSubcategoriesTable extends Migration
             $table->text('sub_image');
             $table->enum('status',['active','inactive']);
             $table->timestamps();
+            $table->timestamp('deleted_at')->nullable();
         });
     }
 

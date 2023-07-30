@@ -21,6 +21,7 @@ class CreateNotificationSchedulesTable extends Migration
             $table->text('message');
             $table->bigInteger('sender_id');
             $table->timestamps();
+            $table->timestamp('deleted_at')->nullable();
         });
     }
 

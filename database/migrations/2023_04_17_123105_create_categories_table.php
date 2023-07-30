@@ -21,6 +21,7 @@ class CreateCategoriesTable extends Migration
             $table->text('image');
             $table->enum('status',['active','inactive']);
             $table->timestamps();
+            $table->timestamp('deleted_at')->nullable();
         });
     }
 

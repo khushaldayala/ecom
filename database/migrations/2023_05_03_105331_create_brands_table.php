@@ -22,6 +22,7 @@ class CreateBrandsTable extends Migration
             $table->string('keyword');
             $table->enum('status',['active','inactive']);
             $table->timestamps();
+            $table->timestamp('deleted_at')->nullable();
         });
     }
 

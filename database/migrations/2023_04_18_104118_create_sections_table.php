@@ -24,6 +24,7 @@ class CreateSectionsTable extends Migration
             $table->text('dlink')->nullable();
             $table->enum('status',['active','inactive']);
             $table->timestamps();
+            $table->timestamp('deleted_at')->nullable();
         });
     }
 

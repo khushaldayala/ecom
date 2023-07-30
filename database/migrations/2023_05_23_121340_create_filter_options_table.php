@@ -20,6 +20,7 @@ class CreateFilterOptionsTable extends Migration
             $table->text('description')->nullable();
             $table->enum('status',['active','inactive']);
             $table->timestamps();
+            $table->timestamp('deleted_at')->nullable();
         });
     }
 

@@ -146,16 +146,41 @@ Route::group(array('prefix' => 'v1'), function()
         Route::get('all_trash_delete_section','all_trash_delete_section')->name('all_trash_delete_section');
     });
 
-    Route::post('offer_store',[OfferController::class,'store'])->name('offer_store');
+    Route::controller(OfferController::class)->group(function () {
+        Route::get('offers','offers')->name('offers');
+        Route::post('offer_store','store')->name('offer_store');
+        Route::post('update_offer/{id}','update')->name('update_offer');
+        Route::get('get_single_offer/{id}','get_single_offer')->name('get_single_offer');
+        Route::delete('delete_offer/{id}','delete')->name('delete_offer');
+        Route::get('trash_offer','trash_offer')->name('trash_offer');
+        Route::get('trash_offer_restore/{id}','trash_offer_restore')->name('trash_offer_restore');
+        Route::delete('trash_offer_delete/{id}','trash_offer_delete')->name('trash_offer_delete');
+        Route::get('all_trash_offer_delete','all_trash_offer_delete')->name('all_trash_offer_delete');
+    });
+
+    Route::controller(VariantController::class)->group(function () {
+        Route::get('variants','variants')->name('variants');
+        Route::post('variant_store','store')->name('variant_store');
+        Route::post('update_variant/{id}','update')->name('update_variant');
+        Route::get('get_single_variant/{id}','get_single_variant')->name('get_single_variant');
+        Route::delete('delete_variant/{id}','delete')->name('delete_variant');
+        Route::get('trash_variant','trash_variant')->name('trash_variant');
+        Route::get('trash_variant_restore/{id}','trash_variant_restore')->name('trash_variant_restore');
+        Route::delete('trash_variant_delete/{id}','trash_variant_delete')->name('trash_variant_delete');
+        Route::get('all_trash_variant_delete','all_trash_variant_delete')->name('all_trash_variant_delete');
+    });
+    
+    // Route::post('offer_store',[OfferController::class,'store'])->name('offer_store');
     Route::post('product_store',[ProductController::class,'store'])->name('product_store');
     Route::post('fabric_store',[FabricController::class,'store'])->name('fabric_store');
     Route::post('subcategory_store',[SubCategoryController::class,'store'])->name('subcategory_store');
-    Route::post('variant_store',[VariantController::class,'store'])->name('variant_store');
+    // Route::post('variant_store',[VariantController::class,'store'])->name('variant_store');
     Route::post('variant_option_store',[VariantOptionController::class,'store'])->name('variant_option_store');
     Route::post('advertise_store',[AdvertiseController::class,'store'])->name('advertise_store');
     Route::post('brand_store',[BrandController::class,'store'])->name('brand_store');
     Route::post('intro_screen_store',[IntroScreenController::class,'store'])->name('intro_screen_store');
     Route::post('filteroption_store',[FilterOptionController::class,'store'])->name('filteroption_store');
+
 
     Route::controller(FilterController::class)->group(function () {
         Route::get('filters','filters')->name('filters');
