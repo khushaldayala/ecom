@@ -18,6 +18,7 @@ class CreateVariantsTable extends Migration
             $table->string('title');
             $table->enum('status',['active','inactive']);
             $table->timestamps();
+            $table->timestamp('deleted_at')->nullable();
         });
     }
 

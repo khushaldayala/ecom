@@ -22,6 +22,7 @@ class CreateAdvertisesTable extends Migration
             $table->text('link');
             $table->enum('status',['active','inactive']);
             $table->timestamps();
+            $table->timestamp('deleted_at')->nullable();
         });
     }
 

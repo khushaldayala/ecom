@@ -28,6 +28,7 @@ class CreateProductsTable extends Migration
             $table->bigInteger('view_count')->default(0);
             $table->enum('status',['active','inactive']);
             $table->timestamps();
+            $table->timestamp('deleted_at')->nullable();
         });
     }
 

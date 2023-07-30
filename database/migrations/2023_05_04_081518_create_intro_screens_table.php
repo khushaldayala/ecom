@@ -21,6 +21,7 @@ class CreateIntroScreensTable extends Migration
             $table->bigInteger('order');
             $table->enum('status',['active','inactive']);
             $table->timestamps();
+            $table->timestamp('deleted_at')->nullable();
         });
     }
 

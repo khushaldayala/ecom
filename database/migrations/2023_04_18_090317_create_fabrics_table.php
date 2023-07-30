@@ -19,6 +19,7 @@ class CreateFabricsTable extends Migration
             $table->string('fab_title');
             $table->enum('status',['active','inactive']);
             $table->timestamps();
+            $table->timestamp('deleted_at')->nullable();
         });
     }
 

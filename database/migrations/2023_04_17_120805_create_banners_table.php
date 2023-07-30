@@ -22,6 +22,7 @@ class CreateBannersTable extends Migration
             $table->string('showtype');
             $table->enum('status',['active','inactive']);
             $table->timestamps();
+            $table->timestamp('deleted_at')->nullable();
         });
     }
 

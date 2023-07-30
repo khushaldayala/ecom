@@ -24,6 +24,7 @@ class CreateOffersTable extends Migration
             $table->bigInteger('discount')->nullable();
             $table->enum('status',['active','inactive']);
             $table->timestamps();
+            $table->timestamp('deleted_at')->nullable();
         });
     }
 
