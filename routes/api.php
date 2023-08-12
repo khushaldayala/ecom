@@ -194,16 +194,78 @@ Route::group(array('prefix' => 'v1'), function()
         Route::get('all_trash_advertise_delete','all_trash_advertise_delete')->name('all_trash_advertise_delete');
     });
 
+    Route::controller(BrandController::class)->group(function () {
+        Route::get('brands','brands')->name('brands');
+        Route::post('brand_store','store')->name('brand_store');
+        Route::post('update_brand/{id}','update')->name('update_brand');
+        Route::get('get_single_brand/{id}','get_single_brand')->name('get_single_brand');
+        Route::delete('delete_brand/{id}','delete')->name('delete_brand');
+        Route::get('trash_brand','trash_brand')->name('trash_brand');
+        Route::get('trash_brand_restore/{id}','trash_brand_restore')->name('trash_brand_restore');
+        Route::delete('trash_brand_delete/{id}','trash_brand_delete')->name('trash_brand_delete');
+        Route::get('all_trash_brand_delete','all_trash_brand_delete')->name('all_trash_brand_delete');
+    });
+
+    Route::controller(SubCategoryController::class)->group(function () {
+        Route::get('sub_categories','sub_categories')->name('sub_categories');
+        Route::post('subcategory_store','store')->name('subcategory_store');
+        Route::post('update_subcategory/{id}','update')->name('update_subcategory');
+        Route::get('get_single_subcategory/{id}','get_single_subcategory')->name('get_single_subcategory');
+        Route::delete('delete_subcategory/{id}','delete')->name('delete_subcategory');
+        Route::get('trash_subcategory','trash_subcategory')->name('trash_subcategory');
+        Route::get('trash_subcategory_restore/{id}','trash_subcategory_restore')->name('trash_subcategory_restore');
+        Route::delete('trash_subcategory_delete/{id}','trash_subcategory_delete')->name('trash_subcategory_delete');
+        Route::get('all_trash_subcategory_delete','all_trash_subcategory_delete')->name('all_trash_subcategory_delete');
+    });
+
+    Route::controller(FabricController::class)->group(function () {
+        Route::get('fabrics','fabrics')->name('fabrics');
+        Route::post('fabric_store','store')->name('fabric_store');
+        Route::post('update_fabric/{id}','update')->name('update_fabric');
+        Route::get('get_single_fabric/{id}','get_single_fabric')->name('get_single_fabric');
+        Route::delete('delete_fabric/{id}','delete')->name('delete_fabric');
+        Route::get('trash_fabric','trash_fabric')->name('trash_fabric');
+        Route::get('trash_fabric_restore/{id}','trash_fabric_restore')->name('trash_fabric_restore');
+        Route::delete('trash_fabric_delete/{id}','trash_fabric_delete')->name('trash_fabric_delete');
+        Route::get('all_trash_fabric_delete','all_trash_fabric_delete')->name('all_trash_fabric_delete');
+    });
+
+    Route::controller(IntroScreenController::class)->group(function () {
+        Route::get('intro_screens','intro_screens')->name('intro_screens');
+        Route::post('intro_screen_store','store')->name('intro_screen_store');
+        Route::post('update_intro_screen/{id}','update')->name('update_intro_screen');
+        Route::get('get_single_intro_screen/{id}','get_single_intro_screen')->name('get_single_intro_screen');
+        Route::delete('delete_intro_screen/{id}','delete')->name('delete_intro_screen');
+        Route::get('trash_intro_screen','trash_intro_screen')->name('trash_intro_screen');
+        Route::get('trash_intro_screen_restore/{id}','trash_intro_screen_restore')->name('trash_intro_screen_restore');
+        Route::delete('trash_intro_screen_delete/{id}','trash_intro_screen_delete')->name('trash_intro_screen_delete');
+        Route::get('all_trash_intro_screen_delete','all_trash_intro_screen_delete')->name('all_trash_intro_screen_delete');
+        Route::get('intro_screen_order_no','handle')->name('intro_screen_order_no');
+    });
+
     Route::post('product_store',[ProductController::class,'store'])->name('product_store');
-    Route::post('fabric_store',[FabricController::class,'store'])->name('fabric_store');
-    Route::post('subcategory_store',[SubCategoryController::class,'store'])->name('subcategory_store');
-    Route::post('brand_store',[BrandController::class,'store'])->name('brand_store');
-    Route::post('intro_screen_store',[IntroScreenController::class,'store'])->name('intro_screen_store');
-    Route::post('filteroption_store',[FilterOptionController::class,'store'])->name('filteroption_store');
-
-
+   
     Route::controller(FilterController::class)->group(function () {
         Route::get('filters','filters')->name('filters');
         Route::post('filter_store','store')->name('filter_store');
+        Route::post('update_filter/{id}','update')->name('update_filter');
+        Route::get('get_single_filter/{id}','get_single_filter')->name('get_single_filter');
+        Route::delete('delete_filter/{id}','delete')->name('delete_filter');
+        Route::get('trash_filters','trash_filter')->name('trash_filters');
+        Route::get('trash_filter_restore/{id}','trash_filter_restore')->name('trash_filter_restore');
+        Route::delete('trash_filter_delete/{id}','trash_filter_delete')->name('trash_filter_delete');
+        Route::get('all_trash_filter_delete','all_trash_filter_delete')->name('all_trash_filter_delete');
+    });
+
+    Route::controller(FilterOptionController::class)->group(function () {
+        Route::get('filteroptions','filteroptions')->name('filteroptions');
+        Route::post('filteroption_store','store')->name('filteroption_store');
+        Route::post('update_filteroption/{id}','update')->name('update_filteroption');
+        Route::get('get_single_filteroption/{id}','get_single_filteroption')->name('get_single_filteroption');
+        Route::delete('delete_filteroption/{id}','delete')->name('delete_filteroption');
+        Route::get('trash_filteroption','trash_filteroption')->name('trash_filteroption');
+        Route::get('trash_filteroption_restore/{id}','trash_filteroption_restore')->name('trash_filteroption_restore');
+        Route::delete('trash_filteroption_delete/{id}','trash_filteroption_delete')->name('trash_filteroption_delete');
+        Route::get('all_trash_filteroption_delete','all_trash_filteroption_delete')->name('all_trash_filteroption_delete');
     });
 });

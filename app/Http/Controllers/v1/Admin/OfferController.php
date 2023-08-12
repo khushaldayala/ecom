@@ -38,7 +38,6 @@ class OfferController extends Controller
 
         if ($validator->fails()) {
             return Response::json([
-                'error_code' => '1007',
                 'status' => '422',
                 'message' => 'All field are requeired'
             ], 422);
@@ -63,13 +62,11 @@ class OfferController extends Controller
             $offer->save();
             if($offer){
                 return Response::json([
-                    'error_code' => '1002',
                     'status' => '200',
                     'message' => 'offer data has been saved'
                 ], 200);
             }else{
                 return Response::json([
-                    'error_code' => '1001',
                     'status' => '401',
                     'message' => 'offer data has been not saved'
                 ], 401);
@@ -104,7 +101,6 @@ class OfferController extends Controller
 
         if ($validator->fails()) {
             return Response::json([
-                'error_code' => '1007',
                 'status' => '422',
                 'message' => 'All field are requeired'
             ], 422);
@@ -134,13 +130,11 @@ class OfferController extends Controller
             $offer->save();
             if($offer){
                 return Response::json([
-                    'error_code' => '1002',
                     'status' => '200',
                     'message' => 'offer data has been Updated'
                 ], 200);
             }else{
                 return Response::json([
-                    'error_code' => '1001',
                     'status' => '401',
                     'message' => 'offer data has been not Updated'
                 ], 401);
