@@ -94,10 +94,6 @@ class AdvertiseController extends Controller
 
             'title'=>'required',
 
-            'image'=>'required',
-
-            'link'=>'required',
-
             'status'=>'required'
 
         ]);

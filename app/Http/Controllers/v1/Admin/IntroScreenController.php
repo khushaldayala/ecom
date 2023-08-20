@@ -10,8 +10,7 @@ use Response;
 class IntroScreenController extends Controller
 {
     public function handle(){
-        $introscreen_order = IntroScreen::all();
-        return $introscreen_order;
+        $introscreen_order = IntroScreen::pluck('order');
         if($introscreen_order){
             return Response::json([
                 'status' => '200',
@@ -59,13 +58,11 @@ class IntroScreenController extends Controller
         $intro->save();
         if($intro){
             return Response::json([
-                'error_code' => '1002',
                 'status' => '200',
                 'message' => 'Intro screen data has been saved'
             ], 200);
         }else{
             return Response::json([
-                'error_code' => '1001',
                 'status' => '401',
                 'message' => 'Intro screen data has been not saved'
             ], 401);
@@ -109,13 +106,11 @@ class IntroScreenController extends Controller
         $intro->save();
         if($intro){
             return Response::json([
-                'error_code' => '1002',
                 'status' => '200',
                 'message' => 'Intro screen data has been updated'
             ], 200);
         }else{
             return Response::json([
-                'error_code' => '1001',
                 'status' => '401',
                 'message' => 'Intro screen data has been not updated'
             ], 401);

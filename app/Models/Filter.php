@@ -16,4 +16,8 @@ class Filter extends Model
         'created_at',
         'updated_at'
     ];
+    public function filteroptions()
+    {
+        return $this->hasMany(FilterOption::class);
+    }
 }

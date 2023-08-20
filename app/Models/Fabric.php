@@ -16,4 +16,13 @@ class Fabric extends Model
         'created_at',
         'updated_at'
     ];
+
+    public function categories()
+    {
+        return $this->belongsTo(Category::class);
+    }
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
 }

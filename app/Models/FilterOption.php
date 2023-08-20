@@ -16,4 +16,8 @@ class FilterOption extends Model
         'created_at',
         'updated_at'
     ];
+    public function filters()
+    {
+        return $this->belongsTo(Filter::class);
+    }
 }

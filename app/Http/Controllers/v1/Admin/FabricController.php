@@ -39,7 +39,6 @@ class FabricController extends Controller
         
         if ($validator->fails()) {
             return Response::json([
-                'error_code' => '1007',
                 'status' => '422',
                 'message' => 'All field are requeired'
             ], 422);
@@ -52,13 +51,11 @@ class FabricController extends Controller
             $fabric->save();
             if($fabric){
                 return Response::json([
-                    'error_code' => '1002',
                     'status' => '200',
                     'message' => 'Fabric data has been saved'
                 ], 200);
             }else{
                 return Response::json([
-                    'error_code' => '1001',
                     'status' => '401',
                     'message' => 'Fabric data has been not saved'
                 ], 401);
@@ -93,7 +90,6 @@ class FabricController extends Controller
         
         if ($validator->fails()) {
             return Response::json([
-                'error_code' => '1007',
                 'status' => '422',
                 'message' => 'All field are requeired'
             ], 422);
@@ -106,13 +102,11 @@ class FabricController extends Controller
             $fabric->save();
             if($fabric){
                 return Response::json([
-                    'error_code' => '1002',
                     'status' => '200',
                     'message' => 'Fabric data has been Updated'
                 ], 200);
             }else{
                 return Response::json([
-                    'error_code' => '1001',
                     'status' => '401',
                     'message' => 'Fabric data has been not Updated'
                 ], 401);
@@ -122,6 +116,7 @@ class FabricController extends Controller
     public function delete($id){
         $fabric = Fabric::find($id);
         $fabric->delete();
+        $fabric->products()->update(['fabric_id'=>null]);
         if($fabric){
             return Response::json([
                 'status' => '200',

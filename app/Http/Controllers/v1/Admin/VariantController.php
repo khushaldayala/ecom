@@ -47,6 +47,7 @@ class VariantController extends Controller
             $variant->save();
             if($variant){
                 return Response::json([
+                    'variant_id' => $variant->id,
                     'status' => '200',
                     'message' => 'variant data has been saved'
                 ], 200);
@@ -109,6 +110,7 @@ class VariantController extends Controller
     public function delete($id){
         $variant = Variant::find($id);
         $variant->delete();
+        $variant->variantoptions()->delete();
         if($variant){
             return Response::json([
                 'status' => '200',

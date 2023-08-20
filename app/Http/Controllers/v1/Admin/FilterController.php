@@ -110,6 +110,7 @@ class FilterController extends Controller
     public function delete($id){
         $filter = Filter::find($id);
         $filter->delete();
+        $filter->filteroptions()->delete();
         if($filter){
             return Response::json([
                 'status' => '200',

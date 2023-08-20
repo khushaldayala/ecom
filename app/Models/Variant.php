@@ -17,4 +17,8 @@ class Variant extends Model
         'updated_at',
         'deleted_at'
     ];
+    public function variantoptions()
+    {
+        return $this->hasMany(VariantOption::class);
+    }
 }

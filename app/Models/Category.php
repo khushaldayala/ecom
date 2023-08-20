@@ -28,4 +28,12 @@ class Category extends Model
     {
         return $this->belongsTo(Section::class);
     }
+    public function subcategory()
+    {
+        return $this->hasMany(Subcategory::class);
+    }
+    public function fabric()
+    {
+        return $this->hasMany(Fabric::class);
+    }
 }

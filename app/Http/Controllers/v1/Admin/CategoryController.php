@@ -38,7 +38,6 @@ class CategoryController extends Controller
 
         if ($validator->fails()) {
             return Response::json([
-                'error_code' => '1007',
                 'status' => '422',
                 'message' => 'All field are requeired'
             ], 422);
@@ -61,13 +60,11 @@ class CategoryController extends Controller
             $category->save();
             if($category){
                 return Response::json([
-                    'error_code' => '1002',
                     'status' => '200',
                     'message' => 'category data has been saved'
                 ], 200);
             }else{
                 return Response::json([
-                    'error_code' => '1001',
                     'status' => '401',
                     'message' => 'category data has been not saved'
                 ], 401);
@@ -100,7 +97,6 @@ class CategoryController extends Controller
 
         if ($validator->fails()) {
             return Response::json([
-                'error_code' => '1007',
                 'status' => '422',
                 'message' => 'All field are requeired'
             ], 422);
@@ -126,13 +122,11 @@ class CategoryController extends Controller
             $category->save();
             if($category){
                 return Response::json([
-                    'error_code' => '1002',
                     'status' => '200',
                     'message' => 'category data has been Updaed successfully'
                 ], 200);
             }else{
                 return Response::json([
-                    'error_code' => '1001',
                     'status' => '401',
                     'message' => 'category data has been not Updated'
                 ], 401);
@@ -142,6 +136,9 @@ class CategoryController extends Controller
     public function delete($id){
         $category = Category::find($id);
         $category->delete();
+        $category->subcategory()->update(['category_id'=>null]);
+        $category->fabric()->update(['category_id'=>null]);
+        $category->products()->update(['category_id'=>null]);
         if($category){
             return Response::json([
                 'status' => '200',

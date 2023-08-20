@@ -43,7 +43,6 @@ class SubCategoryController extends Controller
 
         if ($validator->fails()) {
             return Response::json([
-                'error_code' => '1007',
                 'status' => '422',
                 'message' => 'All field are requeired'
             ], 422);
@@ -67,13 +66,11 @@ class SubCategoryController extends Controller
             $subcategory->save();
             if($subcategory){
                 return Response::json([
-                    'error_code' => '1002',
                     'status' => '200',
                     'message' => 'Sub-category data has been saved'
                 ], 200);
             }else{
                 return Response::json([
-                    'error_code' => '1001',
                     'status' => '401',
                     'message' => 'Sub-category data has been not saved'
                 ], 401);
@@ -110,7 +107,6 @@ class SubCategoryController extends Controller
 
         if ($validator->fails()) {
             return Response::json([
-                'error_code' => '1007',
                 'status' => '422',
                 'message' => 'All field are requeired'
             ], 422);
@@ -138,13 +134,11 @@ class SubCategoryController extends Controller
             $subcategory->save();
             if($subcategory){
                 return Response::json([
-                    'error_code' => '1002',
                     'status' => '200',
                     'message' => 'Sub-category data has been Updated'
                 ], 200);
             }else{
                 return Response::json([
-                    'error_code' => '1001',
                     'status' => '401',
                     'message' => 'Sub-category data has been not Updated'
                 ], 401);
@@ -154,6 +148,7 @@ class SubCategoryController extends Controller
     public function delete($id){
         $sub_category = Subcategory::find($id);
         $sub_category->delete();
+        $sub_category->products()->update(['subcategory_id'=>null]);
         if($sub_category){
             return Response::json([
                 'status' => '200',

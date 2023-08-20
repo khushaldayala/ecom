@@ -147,6 +147,7 @@ class BrandController extends Controller
     public function delete($id){
         $brand = Brand::find($id);
         $brand->delete();
+        $brand->products()->update(['brand_id'=>null]);
         if($brand){
             return Response::json([
                 'status' => '200',

@@ -243,8 +243,7 @@ Route::group(array('prefix' => 'v1'), function()
         Route::get('intro_screen_order_no','handle')->name('intro_screen_order_no');
     });
 
-    Route::post('product_store',[ProductController::class,'store'])->name('product_store');
-   
+    
     Route::controller(FilterController::class)->group(function () {
         Route::get('filters','filters')->name('filters');
         Route::post('filter_store','store')->name('filter_store');
@@ -256,7 +255,7 @@ Route::group(array('prefix' => 'v1'), function()
         Route::delete('trash_filter_delete/{id}','trash_filter_delete')->name('trash_filter_delete');
         Route::get('all_trash_filter_delete','all_trash_filter_delete')->name('all_trash_filter_delete');
     });
-
+    
     Route::controller(FilterOptionController::class)->group(function () {
         Route::get('filteroptions','filteroptions')->name('filteroptions');
         Route::post('filteroption_store','store')->name('filteroption_store');
@@ -267,5 +266,14 @@ Route::group(array('prefix' => 'v1'), function()
         Route::get('trash_filteroption_restore/{id}','trash_filteroption_restore')->name('trash_filteroption_restore');
         Route::delete('trash_filteroption_delete/{id}','trash_filteroption_delete')->name('trash_filteroption_delete');
         Route::get('all_trash_filteroption_delete','all_trash_filteroption_delete')->name('all_trash_filteroption_delete');
+    });
+
+    Route::post('product_store',[ProductController::class,'store'])->name('product_store');
+
+    Route::controller(ProductController::class)->group(function () {
+        Route::get('products','products')->name('products');
+        Route::post('product_store','store')->name('product_store');
+        Route::post('update_product/{id}','update')->name('update_product');
+        Route::get('get_single_product/{id}','get_single_product')->name('get_single_product');
     });
 });
