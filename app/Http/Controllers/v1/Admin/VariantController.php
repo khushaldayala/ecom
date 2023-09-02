@@ -36,7 +36,6 @@ class VariantController extends Controller
         
         if ($validator->fails()) {
             return Response::json([
-                'error_code' => '1007',
                 'status' => '422',
                 'message' => 'All field are requeired'
             ], 422);
@@ -48,13 +47,12 @@ class VariantController extends Controller
             $variant->save();
             if($variant){
                 return Response::json([
-                    'error_code' => '1002',
+                    'variant_id' => $variant->id,
                     'status' => '200',
                     'message' => 'variant data has been saved'
                 ], 200);
             }else{
                 return Response::json([
-                    'error_code' => '1001',
                     'status' => '401',
                     'message' => 'variant data has been not saved'
                 ], 401);
@@ -87,7 +85,6 @@ class VariantController extends Controller
 
         if ($validator->fails()) {
             return Response::json([
-                'error_code' => '1007',
                 'status' => '422',
                 'message' => 'All field are requeired'
             ], 422);
@@ -99,13 +96,11 @@ class VariantController extends Controller
             $variant->save();
             if($variant){
                 return Response::json([
-                    'error_code' => '1002',
                     'status' => '200',
                     'message' => 'variant data has been updated'
                 ], 200);
             }else{
                 return Response::json([
-                    'error_code' => '1001',
                     'status' => '401',
                     'message' => 'variant data has been not updated'
                 ], 401);
@@ -115,6 +110,7 @@ class VariantController extends Controller
     public function delete($id){
         $variant = Variant::find($id);
         $variant->delete();
+        $variant->variantoptions()->delete();
         if($variant){
             return Response::json([
                 'status' => '200',

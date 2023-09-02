@@ -41,7 +41,6 @@ class BannerController extends Controller
 
         if ($validator->fails()) {
             return Response::json([
-                'error_code' => '1007',
                 'status' => '422',
                 'message' => 'All field are requeired'
             ], 422);
@@ -65,13 +64,11 @@ class BannerController extends Controller
             $banner->save();
             if($banner){
                 return Response::json([
-                    'error_code' => '1002',
                     'status' => '200',
                     'message' => 'banner data has been saved'
                 ], 200);
             }else{
                 return Response::json([
-                    'error_code' => '1001',
                     'status' => '401',
                     'message' => 'banner data has been not saved'
                 ], 401);
@@ -94,7 +91,6 @@ class BannerController extends Controller
         }
     }
     public function update(Request $request, $id){
-
         $validator = Validator::make(request()->all(), [
 
             'title'=>'required',
@@ -107,7 +103,6 @@ class BannerController extends Controller
 
         if ($validator->fails()) {
             return Response::json([
-                'error_code' => '1007',
                 'status' => '422',
                 'message' => 'All field are requeired'
             ], 422);
@@ -128,7 +123,9 @@ class BannerController extends Controller
             $banner->section_id = $request->section_id;
             $banner->title = $request->title;
             $banner->description = $request->description;
-            $banner->image = $name;
+            if($request->hasFile('image')){
+                $banner->image = $name;
+            }
             $banner->showtype = $request->showtype;
             $banner->status = $request->status;
             $banner->save();

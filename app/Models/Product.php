@@ -9,10 +9,13 @@ use App\Models\Category;
 use App\Models\Rating;
 use App\Models\Order;
 use App\Models\Review;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
     use HasFactory;
+
+    use SoftDeletes;
 
     protected $hidden = [
         'created_at',
@@ -50,5 +53,17 @@ class Product extends Model
     public function categories()
     {
         return $this->belongsTo(Category::class);
+    }
+    public function fabric()
+    {
+        return $this->belongsTo(Fabric::class);
+    }
+    public function subcategories()
+    {
+        return $this->belongsTo(Subcategory::class);
+    }
+    public function brands()
+    {
+        return $this->belongsTo(Brand::class);
     }
 }

@@ -36,7 +36,6 @@ class SectionController extends Controller
 
         if ($validator->fails()) {
             return Response::json([
-                'error_code' => '1007',
                 'status' => '422',
                 'message' => 'All field are requeired'
             ], 422);
@@ -54,13 +53,12 @@ class SectionController extends Controller
             $section->save();
             if($section){
                 return Response::json([
-                    'error_code' => '1002',
+                    'section_id' => $section->id,
                     'status' => '200',
                     'message' => 'section data has been saved'
                 ], 200);
             }else{
                 return Response::json([
-                    'error_code' => '1001',
                     'status' => '401',
                     'message' => 'section data has been not saved'
                 ], 401);
@@ -93,7 +91,6 @@ class SectionController extends Controller
 
         if ($validator->fails()) {
             return Response::json([
-                'error_code' => '1007',
                 'status' => '422',
                 'message' => 'All field are requeired'
             ], 422);
@@ -125,6 +122,12 @@ class SectionController extends Controller
     public function delete($id){
         $section = Section::find($id);
         $section->delete();
+        $section->products()->update(['section_id' => null]);
+        $section->advertise()->update(['section_id' => null]);
+        $section->banner()->update(['section_id' => null]);
+        $section->category()->update(['section_id' => null]);
+        $section->offer()->update(['section_id' => null]);
+        $section->brand()->update(['section_id' => null]);
         if($section){
             return Response::json([
                 'status' => '200',

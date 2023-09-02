@@ -23,6 +23,10 @@ class VariantOption extends Model
     {
         return $this->belongsTo(Product::class);
     }
+    public function variants()
+    {
+        return $this->belongsTo(Variant::class);
+    }
 
 }
 
