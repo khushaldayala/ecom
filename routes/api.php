@@ -275,5 +275,13 @@ Route::group(array('prefix' => 'v1'), function()
         Route::post('product_store','store')->name('product_store');
         Route::post('update_product/{id}','update')->name('update_product');
         Route::get('get_single_product/{id}','get_single_product')->name('get_single_product');
+        Route::delete('delete_product/{id}','delete')->name('delete_product');
+        Route::get('trash_products','trash_products')->name('trash_products');
+        Route::get('trash_product_restore/{id}','trash_product_restore')->name('trash_product_restore');
+        Route::delete('trash_product_delete/{id}','trash_product_delete')->name('trash_product_delete');
+        Route::get('all_trash_products_delete','all_trash_products_delete')->name('all_trash_products_delete');
+
+        Route::delete('delete_product_image/{id}','delete_product_image')->name('delete_product_image');
+        Route::delete('delete_product_variant_image/{id}','delete_product_variant_image')->name('delete_product_variant_image');
     });
 });

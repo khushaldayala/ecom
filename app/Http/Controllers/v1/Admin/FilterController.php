@@ -47,6 +47,7 @@ class FilterController extends Controller
 
             if($filter){
                 return Response::json([
+                    'filter_id' => $filter->id,
                     'status' => '201',
                     'message' => 'Filter created successfully'
                 ], 201);
