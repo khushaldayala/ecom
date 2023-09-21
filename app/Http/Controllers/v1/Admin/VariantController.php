@@ -143,6 +143,7 @@ class VariantController extends Controller
     public function trash_variant_restore($id){
         $variant = Variant::onlyTrashed()->findOrFail($id);
         $variant->restore();
+        $variant->variantoptions()->restore();
         if($variant){
             return Response::json([
                 'status' => '200',

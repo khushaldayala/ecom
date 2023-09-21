@@ -29,13 +29,13 @@ class IntroScreenController extends Controller
         if($introscreen){
             return Response::json([
                 'status' => '200',
-                'message' => 'IntroScreens list get successfully',
+                'message' => 'Screen content  list get successfully',
                 'data' => $introscreen
             ], 200);
         }else{
             return Response::json([
                 'status' => '404',
-                'message' => 'IntroScreens data not found'
+                'message' => 'Screen content data not found'
             ], 404);
         }
     }
@@ -59,12 +59,12 @@ class IntroScreenController extends Controller
         if($intro){
             return Response::json([
                 'status' => '200',
-                'message' => 'Intro screen data has been saved'
+                'message' => 'Screen content created successfully'
             ], 200);
         }else{
             return Response::json([
                 'status' => '401',
-                'message' => 'Intro screen data has been not saved'
+                'message' => 'Screen content store request failed!'
             ], 401);
         }
     }
@@ -73,7 +73,7 @@ class IntroScreenController extends Controller
         if($introScreen){
             return Response::json([
                 'status' => '200',
-                'message' => 'Introscreen data get successfully',
+                'message' => 'Get single Intro screen data successfully',
                 'data' => $introScreen
             ], 200);
         }else{
@@ -122,12 +122,12 @@ class IntroScreenController extends Controller
         if($introScreen){
             return Response::json([
                 'status' => '200',
-                'message' => 'Intro screen data move to trash successfully'
+                'message' => 'Screen content data move to trash successfully'
             ], 200);
         }else{
             return Response::json([
                 'status' => '401',
-                'message' => 'Intro screen data has been not move in trash'
+                'message' => 'Screen content move to trash request failed!'
             ], 401);
         }
     }
@@ -138,13 +138,13 @@ class IntroScreenController extends Controller
         if($introScreen){
             return Response::json([
                 'status' => '200',
-                'message' => 'Trash introscreens list get successfully',
+                'message' => 'Trash Screen content  list get successfully',
                 'data' => $introScreen
             ], 200);
         }else{
             return Response::json([
                 'status' => '404',
-                'message' => 'Trash introscreens data not found'
+                'message' => 'Trash Screen content data not found'
             ], 404);
         }
     }

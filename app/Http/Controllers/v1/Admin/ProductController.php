@@ -30,23 +30,30 @@ class ProductController extends Controller
     }
     public function store(Request $request)
     {  
-        $validator = Validator::make(request()->all(), [
-            
-            'product_name'=>'required',
+        $validator = Validator::make($request->all(), [
+            'product_name' => 'required',
+
+            'category_id' => 'required',
+
+            'status' => 'required',
+
+            'productVariants' => 'required|array',
 
         ]);
 
         if ($validator->fails()) {
-            return Response::json([
+            return response()->json([
                 'status' => '422',
-                'message' => 'Product name is requeired'
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
             ], 422);
-
-        }else{
+        } else {
+            // Create a new product
             $product = new Product;
             $product->category_id = $request->category_id;
             $product->subcategory_id = $request->subcategory_id;
             $product->fabric_id = $request->fabric_id;
+            $product->brand_id = $request->brand_id;
             $product->section_id = $request->section_id;
             $product->wishlist = '0';
             $product->product_name = $request->product_name;
@@ -57,17 +64,13 @@ class ProductController extends Controller
 
             $productId = $product->id;
 
-            if(isset($request->images)){
-                foreach($request->images as $key=>$images){
-    
-                    $image = $images;
-    
-                    $name = time().$key.'.'.$image->getClientOriginalExtension();
-    
+            // Handle product images
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $key => $image) {
+                    $name = time() . $key . '.' . $image->getClientOriginalExtension();
                     $destinationPath = public_path('/images/products');
-    
-                    $image->move($destinationPath,$name);
-    
+                    $image->move($destinationPath, $name);
+
                     $productImage = new ProductImage;
                     $productImage->product_id = $productId;
                     $productImage->image = $name;
@@ -76,66 +79,58 @@ class ProductController extends Controller
                 }
             }
 
-            if(isset($request->productVariants)){
-
-                foreach($request->productVariants as $key=>$variants){
-
-                    if($variants['discount_type'] != ''){
-                        if($variants['discount_type'] == 'price'){
+            // Handle product variants
+            if ($request->has('productVariants')) {
+                foreach ($request->input('productVariants') as $variants) {
+                    // Handle discount calculation
+                    $dis_price = 0;
+                    if ($variants['discount_type'] != '') {
+                        if ($variants['discount_type'] == 'price') {
                             $dis_price = $variants['original_price'] - $variants['off_price'];
-                        }else if($variants['discount_type'] == 'percentage'){
+                            $variants['off_percentage'] = Null;
+                        } elseif ($variants['discount_type'] == 'percentage') {
                             $dis_price = $variants['original_price'] - ($variants['original_price'] * ($variants['off_percentage'] / 100));
+                            $variants['off_price'] = Null;
                         }
                     }
 
-                   $productvariant = new ProductVariant;
-                   $productvariant->product_id = $productId;
-                   $productvariant->variant_id = $variants['variant_id'];
-                   $productvariant->variant_option_id = $variants['variant_option_id'];
-                   $productvariant->qty = $variants['qty'];
-                   $productvariant->sku = $variants['sku'];
-                   $productvariant->weight = $variants['weight'];
-                   $productvariant->color = $variants['color'];
-                   $productvariant->discount_type = $variants['discount_type'];
-                   $productvariant->off_price = $variants['off_price'];
-                   $productvariant->off_percentage = $variants['off_percentage'];
-                   $productvariant->original_price = $variants['original_price'];
-                   $productvariant->discount_price = $dis_price;
-                   $productvariant->status = 'active';
-                   $productvariant->save();
+                    $productVariant = new ProductVariant;
+                    $productVariant->product_id = $productId;
+                    $productVariant->variant_id = $variants['variant_id'];
+                    $productVariant->variant_option_id = $variants['variant_option_id'];
+                    $productVariant->qty = $variants['qty'];
+                    $productVariant->sku = $variants['sku'];
+                    $productVariant->weight = $variants['weight'];
+                    $productVariant->color = $variants['color'];
+                    $productVariant->discount_type = $variants['discount_type'];
+                    $productVariant->off_price = $variants['off_price'];
+                    $productVariant->off_percentage = $variants['off_percentage'];
+                    $productVariant->original_price = $variants['original_price'];
+                    $productVariant->discount_price = $dis_price;
+                    $productVariant->status = 'active';
+                    $productVariant->save();
 
-                   if (isset($variants['variantImages'])) {
-                        foreach ($variants['variantImages'] as $key=>$imageFile) {
-
+                    // Handle variant images
+                    if (isset($variants['variantImages']) && count($variants['variantImages']) > 0) {
+                        foreach ($variants['variantImages'] as $key => $imageFile) {
                             $image = $imageFile;
-
-                            $name = time().$key.'.'.$image->getClientOriginalExtension();
-
+                            $name = time() . $key . '.' . $image->getClientOriginalExtension();
                             $destinationPath = public_path('/images/productsVariants');
+                            $image->move($destinationPath, $name);
 
-                            $image->move($destinationPath,$name);
-
-                            $productVariant = new ProductVariantImage;
-                            $productVariant->product_variant_id = $productvariant->id;
-                            $productVariant->image = $name;
-                            $productVariant->save();
-
+                            $productVariantImage = new ProductVariantImage;
+                            $productVariantImage->product_variant_id = $productVariant->id;
+                            $productVariantImage->image = $name;
+                            $productVariantImage->save();
                         }
                     }
-               }
+                }
             }
 
-            if($product){
-                return Response::json([
-                    'status' => '200',
-                    'message' => 'Product data has been saved'
-                ], 200);
-            }else{
-                return Response::json([
-                    'status' => '401',
-                    'message' => 'Product data has been not saved'
-                ], 401);
-            }
+            return response()->json([
+                'status' => '200',
+                'message' => 'Product data has been saved'
+            ], 200);
         }
     }
     public function get_single_product($id){
@@ -172,13 +167,14 @@ class ProductController extends Controller
             $product->category_id = $request->category_id;
             $product->subcategory_id = $request->subcategory_id;
             $product->fabric_id = $request->fabric_id;
+            $product->brand_id = $request->brand_id;
             $product->section_id = $request->section_id;
             $product->wishlist = '0';
             $product->product_name = $request->product_name;
             $product->description = $request->description;
             $product->more_info = $request->more_info;
             $product->status = $request->status;
-            $product->save();
+            $product->update();
 
             $productId = $product->id;
 
@@ -195,7 +191,7 @@ class ProductController extends Controller
             //     ProductImage::where('product_id',$id)->delete();
             // }
             
-            if(isset($request->images)){
+            if ($request->hasFile('images')) {
                 foreach($request->images as $key=>$images){
     
                     $image = $images;
@@ -214,14 +210,16 @@ class ProductController extends Controller
                 }
             }
 
-            if(isset($request->productVariants)){
+            if ($request->has('productVariants')) {
                 foreach($request->productVariants as $key=>$variants){
 
                     if($variants['discount_type'] != ''){
                         if($variants['discount_type'] == 'price'){
                             $dis_price = $variants['original_price'] - $variants['off_price'];
+                            $variants['off_percentage'] = Null;
                         }else if($variants['discount_type'] == 'percentage'){
                             $dis_price = $variants['original_price'] - ($variants['original_price'] * ($variants['off_percentage'] / 100));
+                            $variants['off_price'] = Null;
                         }
                     }
                     
@@ -259,7 +257,7 @@ class ProductController extends Controller
                        $productvariant->save();
                     }
 
-                    if (isset($variants['variantImages'])) {
+                    if (isset($variants['variantImages']) && count($variants['variantImages']) > 0) {
 
                         foreach ($variants['variantImages'] as $key=>$imageFile) {
 

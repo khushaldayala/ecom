@@ -26,6 +26,7 @@ use App\Http\Controllers\v1\Admin\BrandController;
 use App\Http\Controllers\v1\Admin\IntroScreenController;
 use App\Http\Controllers\v1\Admin\FilterController;
 use App\Http\Controllers\v1\Admin\FilterOptionController;
+use App\Http\Controllers\v1\Admin\ProductReleaseScheduleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -69,6 +70,7 @@ Route::group(array('prefix' => 'v1'), function()
         Route::get('brand/{id}','brand')->name('brand');
         Route::get('product/{slug}','product')->name('product');
         Route::post('search','search')->name('search');
+        Route::get('categories-subcategory','categoriesSubcategory')->name('categoriesSubcategory');
         Route::get('testcurrency','testcurrency')->name('testcurrency');
     });
 
@@ -283,5 +285,10 @@ Route::group(array('prefix' => 'v1'), function()
 
         Route::delete('delete_product_image/{id}','delete_product_image')->name('delete_product_image');
         Route::delete('delete_product_variant_image/{id}','delete_product_variant_image')->name('delete_product_variant_image');
+    });
+
+    Route::controller(ProductReleaseScheduleController::class)->group(function (){
+        Route::get('get_inactive_product','get_inactive_product')->name('get_inactive_product');
+        Route::post('product_release_date','store')->name('product_release_date');
     });
 });

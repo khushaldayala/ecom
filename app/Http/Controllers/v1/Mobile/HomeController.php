@@ -22,33 +22,26 @@ class HomeController extends Controller
 {
     public function search(Request $request){
 
-        // $products = Product::with('productVariants')
-        //                 ->where('product_name', 'like', '%'.$request->search.'%')
-        //                ->orWhere('description', 'like', '%'.$request->search.'%')
-        //                ->orWhere('more_info', 'like', '%'.$request->search.'%')
-        //                ->get();
-        // $data = $products;
+        $data = Product::with('productVariants','productVariants.productVariantImages','productVariants.productVariantImages','productImages')
+        ->where(function ($query) use ($request) {
+            $query->where('product_name', 'like', '%' . $request->search . '%')
+                ->orWhere('description', 'like', '%' . $request->search . '%')
+                ->orWhere('more_info', 'like', '%' . $request->search . '%');
+        })
+        ->orWhereHas('productVariants', function ($query) use ($request) {
+            $query->where('discount_price', 'like', '%' . $request->search . '%')
+                ->orWhere('sku', 'like', '%' . $request->search . '%')
+                ->orWhere('weight', 'like', '%' . $request->search . '%')
+                ->orWhere('color', 'like', '%' . $request->search . '%');
+        })
+        ->where('status','active')
+        ->get();
 
-        // if(!count($data)>0){
-        //     $products = ProductVariant::with('products')
-        //                 ->where('discount_price', 'like', '%'.$request->search.'%')
-        //                 ->orWhere('sku', 'like', '%'.$request->search.'%')
-        //                 ->orWhere('weight', 'like', '%'.$request->search.'%')
-        //                 ->orWhere('color', 'like', '%'.$request->search.'%')
-        //                 ->get();
-        //     $data = $products;
-        // }
-
-        $query = $request->input('query');
-
-        $products = Product::where('product_name', 'LIKE', "%$query%")
-            ->orWhere('description', 'LIKE', "%$query%")
-            ->orWhereHas('ProductVariant', function ($query) use ($search) {
-                $query->where('color', 'LIKE', "%$search%");
-            })
-            ->with('ProductVariant')
-            ->get();
-        return $data;
+        return Response::json([
+            'status' => '200',
+            'message' => 'Product list get successfully',
+            'data' => $data
+        ], 200);
     }
     public function instrtoscreen(){
         $intro = IntroScreen::where('status','active')->get();
@@ -245,15 +238,16 @@ class HomeController extends Controller
             ->where('status', 'active')
             ->get();
 
-        }else if($slug == ' '){
+        }else if($slug == 'RECENTLY-VIEWED'){
 
             $data = Product::with(['productImages', 'productVariants', 'ratings' => function ($query) {
                 $query->select('product_id', DB::raw('avg(rating) as rating_avg'))
                     ->groupBy('product_id');
             }])
             ->whereHas('wishlists', function ($query){
-                $query->orderBy('created_at', 'desc');
+                $query->orderBy('created_at', 'desc');  
             })
+            ->orderBy('created_at', 'desc')
             ->take(10)
             ->get();
 
@@ -310,6 +304,26 @@ class HomeController extends Controller
                 'status' => '404',
                 'message' => 'Product data not found',
             ], 404);
+        }
+    }
+    public function categoriesSubcategory(){
+        $categories = Category::
+                with(['subcategory' => function($query) {
+                    $query->where('status','active');
+                }])
+                ->where('status','active')
+                ->get();
+        if(count($categories)>0){
+            return Response::json([
+                'status' => '200',
+                'message' => 'Categories data get successful',
+                'data' => $categories
+            ], 200);
+        }else{
+            return Response::json([
+                'status' => '404',
+                'message' => 'Categories data not found',
+            ]);
         }
     }
     public function testcurrency(){
