@@ -37,7 +37,7 @@ class ProductController extends Controller
 
             'status' => 'required',
 
-            'productVariants' => 'required|array',
+            // 'productVariants' => 'required|array',
 
         ]);
 
@@ -81,7 +81,7 @@ class ProductController extends Controller
 
             // Handle product variants
             if ($request->has('productVariants')) {
-                foreach ($request->input('productVariants') as $variants) {
+                foreach ($request->productVariants as $index => $variants) {
                     // Handle discount calculation
                     $dis_price = 0;
                     if ($variants['discount_type'] != '') {
@@ -112,9 +112,10 @@ class ProductController extends Controller
 
                     // Handle variant images
                     if (isset($variants['variantImages']) && count($variants['variantImages']) > 0) {
+                        // dd($variants['variantImages']);
                         foreach ($variants['variantImages'] as $key => $imageFile) {
                             $image = $imageFile;
-                            $name = time() . $key . '.' . $image->getClientOriginalExtension();
+                            $name = time() . $index .$key . '.' . $image->getClientOriginalExtension();
                             $destinationPath = public_path('/images/productsVariants');
                             $image->move($destinationPath, $name);
 
@@ -211,8 +212,7 @@ class ProductController extends Controller
             }
 
             if ($request->has('productVariants')) {
-                foreach($request->productVariants as $key=>$variants){
-
+                foreach($request->productVariants as $index=>$variants){
                     if($variants['discount_type'] != ''){
                         if($variants['discount_type'] == 'price'){
                             $dis_price = $variants['original_price'] - $variants['off_price'];
@@ -263,7 +263,7 @@ class ProductController extends Controller
 
                             $image = $imageFile;
 
-                            $name = time().$key.'.'.$image->getClientOriginalExtension();
+                            $name = time().$index.$key.'.'.$image->getClientOriginalExtension();
 
                             $destinationPath = public_path('/images/productsVariants');
 
@@ -339,7 +339,7 @@ class ProductController extends Controller
 
     // Trash data section
     public function trash_products(){
-        $products = Product::onlyTrashed()->get();
+        $products = Product::with('productImages')->onlyTrashed()->get();
         if($products){
             return Response::json([
                 'status' => '200',
@@ -426,6 +426,22 @@ class ProductController extends Controller
             return Response::json([
                 'status' => '401',
                 'message' => 'Products has been not deleted'
+            ], 401);
+        }
+    }
+    public function delete_product_variant($id){
+        $product = ProductVariant::find($id);
+        $product->productVariantImages()->delete();
+        $product->delete();
+        if($product){
+            return Response::json([
+                'status' => '200',
+                'message' => 'Product variant deleted successfully'
+            ], 200);
+        }else{
+            return Response::json([
+                'status' => '401',
+                'message' => 'Product variants has been not deleted'
             ], 401);
         }
     }

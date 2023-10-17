@@ -58,4 +58,40 @@ class WishlistController extends Controller
             }
         }
     }
+
+    public function remove_wishlist_item(Wishlist $id)
+    {
+        $wishlist = $id->delete();
+
+        if($wishlist){
+            return Response::json([
+                'status' => '200',
+                'message' => 'wishlist deleted successfully'
+            ], 200);
+        }else{
+            return Response::json([
+                'status' => '401',
+                'message' => 'wishlist has been not deleted'
+            ], 401);
+        }
+    }
+
+    public function wishlist_list($userId)
+    {
+        $wishlist = Wishlist::where('user_id',$userId)->get();
+
+        if($wishlist){
+            return Response::json([
+                'status' => '200',
+                'message' => 'wishlist deleted successfully',
+                'data' => $wishlist
+            ], 200);
+        }else{
+            return Response::json([
+                'status' => '200',
+                'message' => 'wishlist has been not deleted',
+                'data' => $wishlist
+            ], 200);
+        }
+    }
 }

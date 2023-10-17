@@ -5,9 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ProductReleaseSchedule extends Model
+class Address extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['product_id','title','release_date','slug'];
+    protected $fillable = ['address', 'city', 'state', 'country', 'zipcode'];
 }

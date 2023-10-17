@@ -8,6 +8,7 @@ use Response;
 use DB;
 use App\Models\Banner;
 use App\Models\Category;
+use App\Models\Subcategory;
 use App\Models\Section;
 use App\Models\Offer;
 use App\Models\ProductImage;
@@ -328,5 +329,124 @@ class HomeController extends Controller
     }
     public function testcurrency(){
         echo convertCurrency(1500, 'USD', 'INR');
+    }
+    public function subcategoryProduct($id)
+    {
+        // $subCategories = Subcategory::with('products')->where('id',$id)->get();
+        $subCategories = Product::with(['productImages', 'productVariants', 'ratings' => function ($query) {
+            $query->select('product_id', DB::raw('avg(rating) as rating_avg'))
+                ->groupBy('product_id');
+        }])
+        ->where('subcategory_id', $id)
+        ->where('status', 'active')
+        ->get();
+
+        if($subCategories){
+            return Response::json([
+                'status' => '200',
+                'message' => 'Subcategory wise product data get successful',
+                'data' => $subCategories
+            ], 200);
+        }else{
+            return Response::json([
+                'status' => '200',
+                'message' => 'Subcategory wise product data is empty',
+                'data' => $subCategories
+            ], 200);
+        }
+    }
+
+    public function price_range_filter(Request $request)
+    {
+        $start = $request->start;
+        $end = $request->end;
+        $id = $request->subcategory_id; // Assuming you have this value in your request
+
+        if($id){
+            $products = Product::with(['productImages', 'productVariants', 'ratings' => function ($query) {
+                $query->select('product_id', DB::raw('avg(rating) as rating_avg'))
+                ->groupBy('product_id');
+            }])
+            ->when($id, function ($query) use ($start, $end) {
+                return $query->whereHas('productVariants', function ($variantQuery) use ($start, $end) {
+                    $variantQuery->whereBetween('discount_price', [$start, $end]);
+                });
+            })
+            ->where('subcategory_id', $id)
+            ->where('status', 'active')
+            ->get();
+        }else{
+            $products = Product::with(['productImages', 'productVariants', 'ratings' => function ($query) {
+                $query->select('product_id', DB::raw('avg(rating) as rating_avg'))
+                ->groupBy('product_id');
+            }])
+            ->when(!$id, function ($query) use ($start, $end) {
+                return $query->whereHas('productVariants', function ($variantQuery) use ($start, $end) {
+                    $variantQuery->whereBetween('discount_price', [$start, $end]);
+                });
+            })
+            ->where('status', 'active')
+            ->get();
+        }
+
+        if($products){
+            return Response::json([
+                'status' => '200',
+                'message' => 'Product data filter successfully',
+                'data' => $products
+            ], 200);
+        }else{
+            return Response::json([
+                'status' => '200',
+                'message' => 'Product data is empty',
+                'data' => $products
+            ], 200);
+        }
+    }
+
+    public function color_filter(Request $request){
+        $color = $request->color; // Assuming you have this value in your request
+        $id = $request->subcategory_id; // Assuming you have this value in your request
+
+        if($id){
+            $products = Product::with(['productImages', 'productVariants', 'ratings' => function ($query) {
+                $query->select('product_id', DB::raw('avg(rating) as rating_avg'))
+                    ->groupBy('product_id');
+            }])
+            ->where('status', 'active')
+            ->when($color, function ($query) use ($color) {
+                return $query->whereHas('productVariants', function ($variantQuery) use ($color) {
+                    $variantQuery->where('color', $color);
+                });
+            })
+            ->where('subcategory_id', $id)
+            ->get();
+        }else{
+            $products = Product::with(['productImages', 'productVariants', 'ratings' => function ($query) {
+                $query->select('product_id', DB::raw('avg(rating) as rating_avg'))
+                    ->groupBy('product_id');
+            }])
+            ->where('status', 'active')
+            ->when($color, function ($query) use ($color) {
+                return $query->whereHas('productVariants', function ($variantQuery) use ($color) {
+                    $variantQuery->where('color', $color);
+                });
+            })
+            ->get();
+        }
+
+        if($products){
+            return Response::json([
+                'status' => '200',
+                'message' => 'Product data filter successfully',
+                'data' => $products
+            ], 200);
+        }else{
+            return Response::json([
+                'status' => '200',
+                'message' => 'Product data is empty',
+                'data' => $products
+            ], 200);
+        }
     }
 }

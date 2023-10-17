@@ -32,7 +32,7 @@ class MobileProductController extends Controller
         }, 'productVariants.variantOptions' => function($query) {
             $query->select('id','option');
         }])
-        ->select('id','category_id','subcategory_id','fabric_id','color_id','section_id','wishlist','product_name','description','more_info')
+        ->select('id','category_id','subcategory_id','fabric_id','section_id','wishlist','product_name','description','more_info')
         ->where('status','active')
         ->findOrFail($id);
 
@@ -44,7 +44,7 @@ class MobileProductController extends Controller
         }, 'productVariants.variantOptions' => function($query) {
             $query->select('id','option');
         }])
-        ->select('id','category_id','subcategory_id','fabric_id','color_id','section_id','wishlist','product_name','description','more_info')
+        ->select('id','category_id','subcategory_id','fabric_id','section_id','wishlist','product_name','description','more_info')
         ->where('status','active')
         ->where('category_id', $product->category_id)
         ->where('id', '!=', $id)
@@ -64,7 +64,7 @@ class MobileProductController extends Controller
         }, 'productVariants' => function($query) {
             $query->select('id','product_id','variant_id','variant_option_id','discount_type','off_price','off_percentage','original_price','discount_price','qty','sku','weight','color');
         }])
-        ->select('id','category_id','subcategory_id','fabric_id','color_id','section_id','wishlist','product_name','description','more_info')
+        ->select('id','category_id','subcategory_id','fabric_id','section_id','wishlist','product_name','description','more_info')
         ->where('status','active')
         ->get();
 

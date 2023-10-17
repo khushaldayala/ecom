@@ -15,17 +15,19 @@ class ProductVariantImage extends Model
     ];
 
     protected $fillable = [
-        'variant_id',
-        'variant_id',
-        'variant_option_id',
-        'qty',
-        'sku',
-        'weight',
-        'color',
-        'discount_type',
-        'off_price',
-        'off_percentage',
-        'original_price'
+        // 'variant_id',
+        // 'variant_id',
+        // 'variant_option_id',
+        // 'qty',
+        // 'sku',
+        // 'weight',
+        // 'color',
+        // 'discount_type',
+        // 'off_price',
+        // 'off_percentage',
+        // 'original_price'
+        'product_variant_id',
+        'image'
     ];
 
     public function productVariants()

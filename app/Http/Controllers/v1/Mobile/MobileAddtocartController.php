@@ -44,8 +44,8 @@ class MobileAddtocartController extends Controller
             $addtocart = new AddToCart();
             $addtocart->user_id = $request->user_id;
             $addtocart->product_id = $request->product_id;
-            $addtocart->filter = $request->filter;
-            $addtocart->filteroption = $request->filteroption;
+            $addtocart->variant = $request->variant;
+            $addtocart->variantoption = $request->variantoption;
             $addtocart->product_name = $request->product_name;
             $addtocart->price = $request->price;
             $addtocart->total = $total_price;
