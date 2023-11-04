@@ -46,6 +46,10 @@ class Product extends Model
     {
         return $this->hasMany(Wishlist::class);
     }
+    public function addtocart()
+    {
+        return $this->hasMany(AddToCart::class);
+    }
     public function oders()
     {
         return $this->hasMany(Order::class);

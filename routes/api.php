@@ -111,7 +111,7 @@ Route::group(array('prefix' => 'v1'), function()
     });
 
     Route::controller(MobileProductController::class)->group(function () {                          // This API group uses for get Product data
-        Route::get('get_single_product/{id}','get_single_product')->name('get_single_product');
+        Route::get('single_product/{id}','single_product')->name('single_product');
         Route::get('get_all_product','get_all_product')->name('get_all_product');
         Route::get('get_category_wise_product/{id}','get_category_wise_product')->name('get_category_wise_product');
         Route::get('get_brand_wise_product/{id}','get_brand_wise_product')->name('get_brand_wise_product');

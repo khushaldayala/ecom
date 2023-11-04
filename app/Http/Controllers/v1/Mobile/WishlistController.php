@@ -43,17 +43,18 @@ class WishlistController extends Controller
                 $wishlist->product_name = $request->product_name;
                 $wishlist->price = $request->price;
                 $wishlist->image = $request->image;
+                $wishlist->variant_id = $request->variant_id;
                 $wishlist->save();
             }
             if($wishlist){
                 return Response::json([
                     'status' => '200',
-                    'message' => 'wishlist updated successfully'
+                    'message' => 'wishlist added successfully'
                 ], 200);
             }else{
                 return Response::json([
                     'status' => '401',
-                    'message' => 'wishlist has been not updated'
+                    'message' => 'wishlist has been not added'
                 ], 401);
             }
         }
@@ -78,18 +79,22 @@ class WishlistController extends Controller
 
     public function wishlist_list($userId)
     {
-        $wishlist = Wishlist::where('user_id',$userId)->get();
+        $wishlist = Wishlist::with([
+            'productVariant' => function ($query) {
+                $query->select('id', 'product_id', 'discount_type', 'off_price', 'off_percentage', 'original_price', 'discount_price');
+            }
+        ])->where('user_id', $userId)->get();
 
         if($wishlist){
             return Response::json([
                 'status' => '200',
-                'message' => 'wishlist deleted successfully',
+                'message' => 'wishlist list get successfully',
                 'data' => $wishlist
             ], 200);
         }else{
             return Response::json([
                 'status' => '200',
-                'message' => 'wishlist has been not deleted',
+                'message' => 'wishlist is empty',
                 'data' => $wishlist
             ], 200);
         }
