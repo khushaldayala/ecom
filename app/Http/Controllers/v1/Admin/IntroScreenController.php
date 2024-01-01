@@ -5,7 +5,7 @@ namespace App\Http\Controllers\v1\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\IntroScreen;
-use Response;
+use Illuminate\Support\Facades\Response;
 
 class IntroScreenController extends Controller
 {

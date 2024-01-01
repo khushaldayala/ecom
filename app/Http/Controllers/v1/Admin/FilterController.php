@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Filter;
-use Response;
+use Illuminate\Support\Facades\Response;
 
 class FilterController extends Controller
 {

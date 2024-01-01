@@ -6,8 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\CheckoutProducts;
 use App\Models\Checkout;
-use Response;
-use DB;
+use App\Models\Order;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\DB;
 
 class ManagerOrderController extends Controller
 {
