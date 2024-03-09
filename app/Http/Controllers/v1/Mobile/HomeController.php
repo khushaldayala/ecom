@@ -4,8 +4,8 @@ namespace App\Http\Controllers\v1\mobile;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Response;
-use DB;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\DB;
 use App\Models\Banner;
 use App\Models\Category;
 use App\Models\Subcategory;
@@ -339,10 +339,10 @@ class HomeController extends Controller
             ]);
         }
     }
-    public function testcurrency()
-    {
-        echo convertCurrency(1500, 'USD', 'INR');
-    }
+    // public function testcurrency()
+    // {
+    //     echo convertCurrency(1500, 'USD', 'INR');
+    // }
     public function subcategoryProduct($id)
     {
         // $subCategories = Subcategory::with('products')->where('id',$id)->get();

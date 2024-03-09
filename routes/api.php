@@ -73,7 +73,7 @@ Route::group(array('prefix' => 'v1'), function()
         Route::get('product/{slug}','product')->name('product');
         Route::post('search','search')->name('search');
         Route::get('categories-subcategory','categoriesSubcategory')->name('categoriesSubcategory');
-        Route::get('testcurrency','testcurrency')->name('testcurrency');
+        // Route::get('testcurrency','testcurrency')->name('testcurrency');
         Route::get('subcategory-product/{id}','subcategoryProduct')->name('subcategoryProduct');
 
         Route::post('price_range_filter','price_range_filter')->name('price_range_filter');
