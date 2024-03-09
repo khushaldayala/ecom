@@ -13,4 +13,9 @@ class CheckoutProducts extends Model
         'created_at',
         'updated_at'
     ];
+
+    public function checkout()
+    {
+        return $this->belongsTo(Checkout::class);
+    }
 }

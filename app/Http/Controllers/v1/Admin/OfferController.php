@@ -5,7 +5,7 @@ namespace App\Http\Controllers\v1\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Response;
+use Illuminate\Support\Facades\Response;
 use App\Models\Offer;
 
 class OfferController extends Controller
@@ -58,6 +58,7 @@ class OfferController extends Controller
             $offer->image = $name;
             $offer->coupon_code = $request->coupon_code;
             $offer->link = $request->link;
+            $offer->discount = $request->discount;
             $offer->status = $request->status;
             $offer->save();
             if($offer){
@@ -93,8 +94,6 @@ class OfferController extends Controller
 
             'title'=>'required',
 
-            'image'=>'required',
-
             'status'=>'required'
 
         ]);
@@ -126,6 +125,7 @@ class OfferController extends Controller
             }
             $offer->coupon_code = $request->coupon_code;
             $offer->link = $request->link;
+            $offer->discount = $request->discount;
             $offer->status = $request->status;
             $offer->save();
             if($offer){

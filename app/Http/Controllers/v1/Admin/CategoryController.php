@@ -5,7 +5,7 @@ namespace App\Http\Controllers\v1\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Response;
+use Illuminate\Support\Facades\Response;
 use App\Models\Category;
 
 class CategoryController extends Controller
@@ -32,7 +32,9 @@ class CategoryController extends Controller
 
             'image'=>'required',
 
-            'status'=>'required'
+            'status'=>'required',
+
+            'portrait_image' => 'required'
 
         ]);
 
@@ -51,10 +53,19 @@ class CategoryController extends Controller
 
             $image->move($destinationPath,$name);
 
+            $image1 = $request->file('portrait_image');
+
+            $name1 = time().'.'.$image1->getClientOriginalExtension();
+
+            $destinationPath1 = public_path('/images/categories');
+
+            $image1->move($destinationPath1,$name1);
+
             $category = new Category;
             $category->title = $request->title;
             $category->description = $request->description;
             $category->image = $name;
+            $category->portrait_image = $name1;
             $category->status = $request->status;
             $category->section_id = $request->section_id;
             $category->save();
@@ -111,12 +122,24 @@ class CategoryController extends Controller
 
                 $image->move($destinationPath,$name);
             }
+            if($request->hasFile('portrait_image')){
+                $image1 = $request->file('portrait_image');
+
+                $name1 = time().'.'.$image1->getClientOriginalExtension();
+
+                $destinationPath1 = public_path('/images/categories');
+
+                $image1->move($destinationPath1,$name1);
+            }
             $category = Category::find($id);
             $category->title = $request->title;
             $category->description = $request->description;
             if($request->hasFile('image')){
                 $category->image = $name;
             };
+            if($request->hasFile('portrait_image')){
+                $category->portrait_image = $name1;
+            }
             $category->status = $request->status;
             $category->section_id = $request->section_id;
             $category->save();

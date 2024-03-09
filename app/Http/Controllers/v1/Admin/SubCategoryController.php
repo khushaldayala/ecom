@@ -5,7 +5,7 @@ namespace App\Http\Controllers\v1\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Response;
+use Illuminate\Support\Facades\Response;
 use App\Models\Subcategory;
 
 class SubCategoryController extends Controller

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\v1\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Response;
+use Illuminate\Support\Facades\Response;
 use App\Models\Variant;
 
 class VariantController extends Controller
@@ -143,6 +143,7 @@ class VariantController extends Controller
     public function trash_variant_restore($id){
         $variant = Variant::onlyTrashed()->findOrFail($id);
         $variant->restore();
+        $variant->variantoptions()->restore();
         if($variant){
             return Response::json([
                 'status' => '200',

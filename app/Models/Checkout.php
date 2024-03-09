@@ -13,4 +13,14 @@ class Checkout extends Model
         'created_at',
         'updated_at'
     ];
+
+    public function checkoutProducts()
+    {
+        return $this->hasMany(CheckoutProducts::class);
+    }
+
+    public function order()
+    {
+        return $this->hasOne(Order::class);
+    }
 }

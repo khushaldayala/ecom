@@ -12,6 +12,7 @@ use App\Http\Controllers\v1\Mobile\MobileNotification;
 use App\Http\Controllers\v1\Mobile\PaymentController;
 use App\Http\Controllers\v1\Mobile\KeywordController;
 
+use App\Http\Controllers\v1\Admin\DashboardController;
 use App\Http\Controllers\v1\Admin\BannerController;
 use App\Http\Controllers\v1\Admin\CategoryController;
 use App\Http\Controllers\v1\Admin\SectionController;
@@ -26,6 +27,8 @@ use App\Http\Controllers\v1\Admin\BrandController;
 use App\Http\Controllers\v1\Admin\IntroScreenController;
 use App\Http\Controllers\v1\Admin\FilterController;
 use App\Http\Controllers\v1\Admin\FilterOptionController;
+use App\Http\Controllers\v1\Admin\ProductReleaseScheduleController;
+use App\Http\Controllers\v1\Admin\ManagerOrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -69,12 +72,17 @@ Route::group(array('prefix' => 'v1'), function()
         Route::get('brand/{id}','brand')->name('brand');
         Route::get('product/{slug}','product')->name('product');
         Route::post('search','search')->name('search');
-        Route::get('testcurrency','testcurrency')->name('testcurrency');
+        Route::get('categories-subcategory','categoriesSubcategory')->name('categoriesSubcategory');
+        // Route::get('testcurrency','testcurrency')->name('testcurrency');
+        Route::get('subcategory-product/{id}','subcategoryProduct')->name('subcategoryProduct');
+
+        Route::post('price_range_filter','price_range_filter')->name('price_range_filter');
+        Route::post('color_filter','color_filter')->name('color_filter');
     });
 
     Route::controller(MobileAddtocartController::class)->group(function () {
         Route::post('store_addtocart','store')->name('store_addtocart');
-        Route::delete('remove_cart/{id}','remove_cart')->name('remove_cart')->middleware('auth:sanctum');
+        Route::delete('remove_cart/{id}','remove_cart')->name('remove_cart');
         Route::post('update_cart','update_cart')->name('update_cart');
         Route::get('get_addtocart_count/{id}','get_addtocart_count')->name('get_addtocart_count');
         Route::get('get_cart_items/{id}','get_cart_items')->name('get_cart_items');
@@ -87,6 +95,13 @@ Route::group(array('prefix' => 'v1'), function()
 
     Route::controller(PaymentController::class)->group(function () {
         Route::post('store_checkout','store_checkout')->name('store_checkout');
+        Route::post('update-checkout-address/{addressId}','update_address')->name('update-checkout-address');
+        Route::delete('remove-checkout-address/{address}','remove_address')->name('delete-checkout-address');
+        Route::get('checkout-address-list/{userId}','address_list')->name('checkout-address-list');
+
+        Route::post('payment','payment')->name('payment');
+        Route::get('get-orders-list/{userId}','get_order_list')->name('get-orders-list');
+        Route::post('store-order-note','store_order_note')->name('store-order-note');
     });
 
     Route::controller(MobileNotification::class)->group(function () {
@@ -96,18 +111,22 @@ Route::group(array('prefix' => 'v1'), function()
     });
 
     Route::controller(MobileProductController::class)->group(function () {                          // This API group uses for get Product data
-        Route::get('get_single_product/{id}','get_single_product')->name('get_single_product');
+        Route::get('single_product/{id}','single_product')->name('single_product');
         Route::get('get_all_product','get_all_product')->name('get_all_product');
         Route::get('get_category_wise_product/{id}','get_category_wise_product')->name('get_category_wise_product');
         Route::get('get_brand_wise_product/{id}','get_brand_wise_product')->name('get_brand_wise_product');
     });
 
-    Route::post('wishlist_store',[WishlistController::class,'store'])->name('wishlist_store');
-
-    Route::middleware(['auth:sanctum'])->group(function (){
-        Route::post('store_rating',[RatingReviewController::class,'store_rating'])->name('store_rating');
-        Route::post('store_review',[RatingReviewController::class,'store_review'])->name('store_review');
+    Route::controller(WishlistController::class)->group(function () {
+        Route::post('wishlist_store','store')->name('wishlist_store');
+        Route::delete('remove_wishlist_item/{id}','remove_wishlist_item')->name('remove_wishlist_item');
+        Route::get('wishlist_list/{userId}','wishlist_list')->name('wishlist_list');
     });
+
+    // Route::middleware(['auth:sanctum'])->group(function (){
+        Route::post('store_review_rating',[RatingReviewController::class,'store_review_rating'])->name('store_review_rating');
+        // Route::post('store_review',[RatingReviewController::class,'store_review'])->name('store_review');
+    // });
 
     // Admin panel
     Route::controller(BannerController::class)->group(function () {
@@ -281,7 +300,29 @@ Route::group(array('prefix' => 'v1'), function()
         Route::delete('trash_product_delete/{id}','trash_product_delete')->name('trash_product_delete');
         Route::get('all_trash_products_delete','all_trash_products_delete')->name('all_trash_products_delete');
 
+        Route::delete('delete_product_variant/{id}','delete_product_variant')->name('delete_product_variant');
         Route::delete('delete_product_image/{id}','delete_product_image')->name('delete_product_image');
         Route::delete('delete_product_variant_image/{id}','delete_product_variant_image')->name('delete_product_variant_image');
+    });
+
+    Route::controller(ProductReleaseScheduleController::class)->group(function (){
+        Route::get('get_inactive_product','get_inactive_product')->name('get_inactive_product');
+        Route::get('product-schedules','productSchedules')->name('product-schedules');
+        Route::post('product_release_schedule_store','store')->name('product_release_schedule_store');
+        Route::delete('product-schedules-delete/{slug}','delete')->name('product-schedules-delete');
+        Route::get('get-products-schedule-details/{slug}','get_single_schedule_deltails')->name('get-products-schedule-details');
+        Route::delete('delete-scheduling-product/{id}','delete_scheduling_product')->name('delete-scheduling-product');
+        Route::post('add-scheduling-product','add_scheduling_product')->name('add-scheduling-product');
+    });
+
+    Route::controller(ManagerOrderController::class)->group(function (){
+        Route::get('get-order-list','getOrderList')->name('get-order-list');
+        Route::get('get-single-order/{id}','getSingleOrder')->name('get-single-order');
+        Route::get('payment-history','paymentHistory')->name('payment-history');
+    }); 
+
+    Route::controller(DashboardController::class)->group(function (){
+        Route::post('admin-login','login')->name('admin-login');
+        Route::get('dashboard','index')->name('dashboard');
     });
 });
