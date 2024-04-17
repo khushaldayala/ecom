@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\v1\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\FilterOptionStoreRequest;
+use App\Http\Requests\FilterOptionUpdateRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\FilterOption;
@@ -25,40 +27,25 @@ class FilterOptionController extends Controller
             ], 404);
         }
     }
-    public function store(Request $request){
-        $validator = Validator::make(request()->all(), [
+    public function store(FilterOptionStoreRequest $request){
+       
+        $filteroption = new FilterOption;
+        $filteroption->filter_id = $request->filter_id;
+        $filteroption->title = $request->title;
+        $filteroption->description = $request->description;
+        $filteroption->status = $request->status;
+        $filteroption->save();
 
-            'filter_id'=>'required',
-
-            'title'=>'required'
-
-        ]);
-
-        if ($validator->fails()) {
+        if($filteroption){
             return Response::json([
-                'status' => '422',
-                'message' => 'Title are requeired'
-            ], 422);
-
+                'status' => '201',
+                'message' => 'Filter Option created successfully'
+            ], 201);
         }else{
-            $filteroption = new FilterOption;
-            $filteroption->filter_id = $request->filter_id;
-            $filteroption->title = $request->title;
-            $filteroption->description = $request->description;
-            $filteroption->status = $request->status;
-            $filteroption->save();
-
-            if($filteroption){
-                return Response::json([
-                    'status' => '201',
-                    'message' => 'Filter Option created successfully'
-                ], 201);
-            }else{
-                return Response::json([
-                    'status' => '401',
-                    'message' => 'Filter option create request fail'
-                ], 401);
-            }
+            return Response::json([
+                'status' => '401',
+                'message' => 'Filter option create request fail'
+            ], 401);
         }
     }
     public function get_single_filteroption($id){
@@ -76,41 +63,25 @@ class FilterOptionController extends Controller
             ], 404);
         }
     }
-    public function update(Request $request, $id){
+    public function update(FilterOptionUpdateRequest $request, $id){
 
-        $validator = Validator::make(request()->all(), [
+        $filteroption = FilterOption::find($id);
+        $filteroption->filter_id = $request->filter_id;
+        $filteroption->title = $request->title;
+        $filteroption->description = $request->description;
+        $filteroption->status = $request->status;
+        $filteroption->save();
 
-            'filter_id'=>'required',
-
-            'title'=>'required'
-
-        ]);
-
-        if ($validator->fails()) {
+        if($filteroption){
             return Response::json([
-                'status' => '422',
-                'message' => 'Title are requeired'
-            ], 422);
-
+                'status' => '201',
+                'message' => 'Filter Option updated successfully'
+            ], 201);
         }else{
-            $filteroption = FilterOption::find($id);
-            $filteroption->filter_id = $request->filter_id;
-            $filteroption->title = $request->title;
-            $filteroption->description = $request->description;
-            $filteroption->status = $request->status;
-            $filteroption->save();
-
-            if($filteroption){
-                return Response::json([
-                    'status' => '201',
-                    'message' => 'Filter Option updated successfully'
-                ], 201);
-            }else{
-                return Response::json([
-                    'status' => '401',
-                    'message' => 'Filter option updated request fail'
-                ], 401);
-            }
+            return Response::json([
+                'status' => '401',
+                'message' => 'Filter option updated request fail'
+            ], 401);
         }
     }
     public function delete($id){

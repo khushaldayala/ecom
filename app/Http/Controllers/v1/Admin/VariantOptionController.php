@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\v1\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\VariantOptionStoreRequest;
+use App\Http\Requests\VariantOptionUpdateRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Response;
@@ -25,40 +27,23 @@ class VariantOptionController extends Controller
             ], 404);
         }
     }
-    public function store(Request $request){
-        $validator = Validator::make(request()->all(), [
-
-            'variant_id'=>'required',
-
-            'option'=>'required',
-
-            'status'=>'required'
-
-        ]);
-        
-        if ($validator->fails()) {
+    public function store(VariantOptionStoreRequest $request){
+       
+        $variantoption = new VariantOption;
+        $variantoption->variant_id = $request->variant_id;
+        $variantoption->option = $request->option;
+        $variantoption->status = $request->status;
+        $variantoption->save();
+        if($variantoption){
             return Response::json([
-                'status' => '422',
-                'message' => 'All field are requeired'
-            ], 422);
-            
+                'status' => '200',
+                'message' => 'Variant Option data has been saved'
+            ], 200);
         }else{
-            $variantoption = new VariantOption;
-            $variantoption->variant_id = $request->variant_id;
-            $variantoption->option = $request->option;
-            $variantoption->status = $request->status;
-            $variantoption->save();
-            if($variantoption){
-                return Response::json([
-                    'status' => '200',
-                    'message' => 'Variant Option data has been saved'
-                ], 200);
-            }else{
-                return Response::json([
-                    'status' => '401',
-                    'message' => 'Variant Option data has been not saved'
-                ], 401);
-            }
+            return Response::json([
+                'status' => '401',
+                'message' => 'Variant Option data has been not saved'
+            ], 401);
         }
     }
     public function get_single_variant_option($id){
@@ -76,40 +61,23 @@ class VariantOptionController extends Controller
             ], 404);
         }
     }
-    public function update(Request $request, $id){
-        $validator = Validator::make(request()->all(), [
-
-            'variant_id'=>'required',
-
-            'option'=>'required',
-
-            'status'=>'required'
-
-        ]);
-
-        if ($validator->fails()) {
+    public function update(VariantOptionUpdateRequest $request, $id){
+        
+        $variantoption = VariantOption::find($id);
+        $variantoption->variant_id = $request->variant_id;
+        $variantoption->option = $request->option;
+        $variantoption->status = $request->status;
+        $variantoption->save();
+        if($variantoption){
             return Response::json([
-                'status' => '422',
-                'message' => 'All field are requeired'
-            ], 422);
-
+                'status' => '200',
+                'message' => 'Variant Option data has been updated'
+            ], 200);
         }else{
-            $variantoption = VariantOption::find($id);
-            $variantoption->variant_id = $request->variant_id;
-            $variantoption->option = $request->option;
-            $variantoption->status = $request->status;
-            $variantoption->save();
-            if($variantoption){
-                return Response::json([
-                    'status' => '200',
-                    'message' => 'Variant Option data has been updated'
-                ], 200);
-            }else{
-                return Response::json([
-                    'status' => '401',
-                    'message' => 'Variant Option data has been not updated'
-                ], 401);
-            }
+            return Response::json([
+                'status' => '401',
+                'message' => 'Variant Option data has been not updated'
+            ], 401);
         }
     }
     public function delete($id){

@@ -38,7 +38,7 @@ class RatingReviewController extends Controller
 
                 $image->move($destinationPath,$name);
             }else{
-                $name = ''; 
+                $name = '';
             }
             $rating = new Rating;
             $rating->user_id = $request->user_id;

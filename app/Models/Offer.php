@@ -22,4 +22,19 @@ class Offer extends Model
     {
         return $this->belongsTo(Section::class);
     }
+
+    public function offer_products()
+    {
+        $this->hasMany(OfferProduct::class);
+    }
+
+    public function section_offers()
+    {
+        return $this->hasMany(SectionOffer::class)->select('id', 'section_id', 'offer_id');
+    }
+
+    public function offer_product()
+    {
+        return $this->hasMany(OfferProduct::class)->select('id', 'product_id', 'offer_id');
+    }
 }

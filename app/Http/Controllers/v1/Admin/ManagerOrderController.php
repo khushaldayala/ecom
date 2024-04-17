@@ -7,8 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\CheckoutProducts;
 use App\Models\Checkout;
 use App\Models\Order;
-use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\DB;
+use Response;
+use DB;
 
 class ManagerOrderController extends Controller
 {
@@ -26,13 +26,13 @@ class ManagerOrderController extends Controller
     ->with(['checkout.order'])
     ->groupBy('checkout_id')
     ->get();
-
+    
     return Response::json([
             'status' => '200',
             'message' => 'Order list get successfuly',
             'data' => $orderList
         ], 200);
-    }
+        }
 
     public function getSingleOrder($id){
         $checkout = Checkout::with('checkoutProducts','order','order.orderNotes')->find($id);
@@ -43,7 +43,7 @@ class ManagerOrderController extends Controller
             'data' => $checkout
         ], 200);
     }
-
+    
     public function paymentHistory()
     {
         $orders = Order::with('user')->get();

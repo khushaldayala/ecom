@@ -36,4 +36,8 @@ class Category extends Model
     {
         return $this->hasMany(Fabric::class);
     }
+    public function section_categories()
+    {
+        return $this->hasMany(SectionCategory::class)->select('id', 'section_id', 'category_id');
+    }
 }
