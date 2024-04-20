@@ -25,4 +25,9 @@ class Brand extends Model
     {
         return $this->hasMany(Product::class);
     }
+
+    public function section_brands()
+    {
+        return $this->hasMany(SectionBrand::class)->select('id', 'section_id', 'brand_id');
+    }
 }

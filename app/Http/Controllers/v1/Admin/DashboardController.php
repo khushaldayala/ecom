@@ -4,7 +4,7 @@ namespace App\Http\Controllers\v1\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Response;
+use Response;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -35,7 +35,7 @@ class DashboardController extends Controller
             'data' => $data
         ], 200);
     }
-
+    
     public function login(Request $request){
 
         $validator = Validator::make(request()->all(), [

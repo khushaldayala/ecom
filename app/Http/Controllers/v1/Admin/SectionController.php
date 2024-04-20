@@ -3,13 +3,18 @@
 namespace App\Http\Controllers\v1\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\SectionStoreRequest;
+use App\Http\Requests\SectionUpdateRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Response;
 use App\Models\Section;
+use App\Traits\SectionTrait;
 
 class SectionController extends Controller
 {
+    use SectionTrait;
+
     public function sections(){
         $section = Section::all();
         if($section){
@@ -25,44 +30,43 @@ class SectionController extends Controller
             ], 404);
         }
     }
-    public function store(Request $request){
-        $validator = Validator::make(request()->all(), [
+    public function store(SectionStoreRequest $request){
 
-            'title'=>'required',
+        $maxOrder = Section::max('order');
+        if(!$maxOrder)
+        {
+            $maxOrder = 0;
+        }
+        $maxOrder++;
 
-            'status'=>'required'
+        $section = new Section;
+        $section->title = $request->title;
+        $section->description = $request->description;
+        $section->keywords = $request->keywords;
+        $section->keyword_option = $request->keyword_option;
+        $section->end_point = $request->end_point;
+        $section->order = $maxOrder;
+        $section->dlink = $request->dlink;
+        $section->assign_type = $request->assign_type;
+        $section->status = $request->status;
+        $section->save();
 
-        ]);
+        if($request->assignIds)
+        {
+            $this->assignToSection($request->assign_type, $section, $request->assignIds);
+        }
 
-        if ($validator->fails()) {
+        if($section){
             return Response::json([
-                'status' => '422',
-                'message' => 'All field are requeired'
-            ], 422);
-
+                'section_id' => $section->id,
+                'status' => '200',
+                'message' => 'section data has been saved'
+            ], 200);
         }else{
-            $section = new Section;
-            $section->title = $request->title;
-            $section->description = $request->description;
-            $section->keywords = $request->keywords;
-            $section->keyword_option = $request->keyword_option;
-            $section->end_point = $request->end_point;
-            $section->order = $request->order;
-            $section->dlink = $request->dlink;
-            $section->status = $request->status;
-            $section->save();
-            if($section){
-                return Response::json([
-                    'section_id' => $section->id,
-                    'status' => '200',
-                    'message' => 'section data has been saved'
-                ], 200);
-            }else{
-                return Response::json([
-                    'status' => '401',
-                    'message' => 'section data has been not saved'
-                ], 401);
-            }
+            return Response::json([
+                'status' => '401',
+                'message' => 'section data has been not saved'
+            ], 401);
         }
     }
     public function get_single_section($id){
@@ -80,43 +84,34 @@ class SectionController extends Controller
             ], 404);
         }
     }
-    public function update_section(Request $request, $id){
-        $validator = Validator::make(request()->all(), [
+    public function update_section(SectionUpdateRequest $request, $id){
+        
+        $section = Section::find($id);
+        $section->title = $request->title;
+        $section->description = $request->description;
+        $section->keywords = $request->keywords;
+        $section->keyword_option = $request->keyword_option;
+        $section->end_point = $request->end_point;
+        $section->order = $request->order;
+        $section->dlink = $request->dlink;
+        $section->assign_type = $request->assign_type;
+        $section->status = $request->status;
+        $section->save();
 
-            'title'=>'required',
+        if ($request->assignIds) {
+            $this->assignToSection($request->assign_type, $section, $request->assignIds);
+        }
 
-            'status'=>'required'
-
-        ]);
-
-        if ($validator->fails()) {
+        if($section){
             return Response::json([
-                'status' => '422',
-                'message' => 'All field are requeired'
-            ], 422);
-
+                'status' => '200',
+                'message' => 'section data has been Updated'
+            ], 200);
         }else{
-            $section = Section::find($id);
-            $section->title = $request->title;
-            $section->description = $request->description;
-            $section->keywords = $request->keywords;
-            $section->keyword_option = $request->keyword_option;
-            $section->end_point = $request->end_point;
-            $section->order = $request->order;
-            $section->dlink = $request->dlink;
-            $section->status = $request->status;
-            $section->save();
-            if($section){
-                return Response::json([
-                    'status' => '200',
-                    'message' => 'section data has been Updated'
-                ], 200);
-            }else{
-                return Response::json([
-                    'status' => '401',
-                    'message' => 'section data has been not Updated'
-                ], 401);
-            }
+            return Response::json([
+                'status' => '401',
+                'message' => 'section data has been not Updated'
+            ], 401);
         }
     }
     public function delete($id){

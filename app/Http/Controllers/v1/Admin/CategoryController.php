@@ -3,13 +3,19 @@
 namespace App\Http\Controllers\v1\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CategoryStoreRequest;
+use App\Http\Requests\CategoryUpdateRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Response;
 use App\Models\Category;
+use App\Models\SectionCategory;
+use App\Traits\CategoryTrait;
 
 class CategoryController extends Controller
 {
+    use CategoryTrait;
+
     public function categories(){
         $category = Category::all();
         if($category){
@@ -25,65 +31,51 @@ class CategoryController extends Controller
             ], 404);
         }
     }
-    public function store(Request $request){
-        $validator = Validator::make(request()->all(), [
+    public function store(CategoryStoreRequest $request){
+        
+        $image = $request->file('image');
 
-            'title'=>'required',
+        $name = time().'.'.$image->getClientOriginalExtension();
 
-            'image'=>'required',
+        $destinationPath = public_path('/images/categories');
 
-            'status'=>'required',
+        $image->move($destinationPath,$name);
 
-            'portrait_image' => 'required'
+        $image1 = $request->file('portrait_image');
 
-        ]);
+        $name1 = time().'0101'.'.'.$image1->getClientOriginalExtension();
 
-        if ($validator->fails()) {
+        $destinationPath1 = public_path('/images/categories');
+
+        $image1->move($destinationPath1,$name1);
+
+        $category = new Category;
+        $category->title = $request->title;
+        $category->description = $request->description;
+        $category->image = $name;
+        $category->portrait_image = $name1;
+        $category->status = $request->status;
+        $category->section_id = $request->section_id ? $request->section_id[0] : null;
+        $category->save();
+
+        if ($request->section_id) {
+            $this->categoryAssignTosection($category, $request->section_id);
+        }
+
+        if($category){
             return Response::json([
-                'status' => '422',
-                'message' => 'All field are requeired'
-            ], 422);
-
+                'status' => '200',
+                'message' => 'category data has been saved'
+            ], 200);
         }else{
-            $image = $request->file('image');
-
-            $name = time().'.'.$image->getClientOriginalExtension();
-
-            $destinationPath = public_path('/images/categories');
-
-            $image->move($destinationPath,$name);
-
-            $image1 = $request->file('portrait_image');
-
-            $name1 = time().'.'.$image1->getClientOriginalExtension();
-
-            $destinationPath1 = public_path('/images/categories');
-
-            $image1->move($destinationPath1,$name1);
-
-            $category = new Category;
-            $category->title = $request->title;
-            $category->description = $request->description;
-            $category->image = $name;
-            $category->portrait_image = $name1;
-            $category->status = $request->status;
-            $category->section_id = $request->section_id;
-            $category->save();
-            if($category){
-                return Response::json([
-                    'status' => '200',
-                    'message' => 'category data has been saved'
-                ], 200);
-            }else{
-                return Response::json([
-                    'status' => '401',
-                    'message' => 'category data has been not saved'
-                ], 401);
-            }
+            return Response::json([
+                'status' => '401',
+                'message' => 'category data has been not saved'
+            ], 401);
         }
     }
     public function get_single_category($id){
-        $category = Category::findorfail($id);
+        $category = Category::with('section_categories.section')->findorfail($id);
         if($category){
             return Response::json([
                 'status' => '200',
@@ -97,71 +89,61 @@ class CategoryController extends Controller
             ], 404);
         }
     }
-    public function update(Request $request, $id){
-        $validator = Validator::make(request()->all(), [
+    public function update(CategoryUpdateRequest $request, $id){
+       
+        if($request->hasFile('image')){
+            $image = $request->file('image');
 
-            'title'=>'required',
+            $name = time().'.'.$image->getClientOriginalExtension();
 
-            'status'=>'required'
+            $destinationPath = public_path('/images/categories');
 
-        ]);
+            $image->move($destinationPath,$name);
+        }
+        if($request->hasFile('portrait_image')){
+            $image1 = $request->file('portrait_image');
 
-        if ($validator->fails()) {
+            $name1 = time().'.'.$image1->getClientOriginalExtension();
+
+            $destinationPath1 = public_path('/images/categories');
+
+            $image1->move($destinationPath1,$name1);
+        }
+        $category = Category::find($id);
+        $category->title = $request->title;
+        $category->description = $request->description;
+        if($request->hasFile('image')){
+            $category->image = $name;
+        };
+        if($request->hasFile('portrait_image')){
+            $category->portrait_image = $name1;
+        }
+        $category->status = $request->status;
+        $category->section_id = $request->section_id ? $request->section_id[0] : null;
+        $category->save();
+
+        if ($request->section_id) {
+            $this->categoryAssignTosection($category, $request->section_id);
+        }
+        
+        if($category){
             return Response::json([
-                'status' => '422',
-                'message' => 'All field are requeired'
-            ], 422);
-
+                'status' => '200',
+                'message' => 'category data has been Updaed successfully'
+            ], 200);
         }else{
-            if($request->hasFile('image')){
-                $image = $request->file('image');
-
-                $name = time().'.'.$image->getClientOriginalExtension();
-
-                $destinationPath = public_path('/images/categories');
-
-                $image->move($destinationPath,$name);
-            }
-            if($request->hasFile('portrait_image')){
-                $image1 = $request->file('portrait_image');
-
-                $name1 = time().'.'.$image1->getClientOriginalExtension();
-
-                $destinationPath1 = public_path('/images/categories');
-
-                $image1->move($destinationPath1,$name1);
-            }
-            $category = Category::find($id);
-            $category->title = $request->title;
-            $category->description = $request->description;
-            if($request->hasFile('image')){
-                $category->image = $name;
-            };
-            if($request->hasFile('portrait_image')){
-                $category->portrait_image = $name1;
-            }
-            $category->status = $request->status;
-            $category->section_id = $request->section_id;
-            $category->save();
-            if($category){
-                return Response::json([
-                    'status' => '200',
-                    'message' => 'category data has been Updaed successfully'
-                ], 200);
-            }else{
-                return Response::json([
-                    'status' => '401',
-                    'message' => 'category data has been not Updated'
-                ], 401);
-            }
+            return Response::json([
+                'status' => '401',
+                'message' => 'category data has been not Updated'
+            ], 401);
         }
     }
     public function delete($id){
         $category = Category::find($id);
         $category->delete();
-        $category->subcategory()->update(['category_id'=>null]);
-        $category->fabric()->update(['category_id'=>null]);
-        $category->products()->update(['category_id'=>null]);
+        // $category->subcategory()->update(['category_id'=>null]);
+        // $category->fabric()->update(['category_id'=>null]);
+        // $category->products()->update(['category_id'=>null]);
         if($category){
             return Response::json([
                 'status' => '200',
@@ -234,6 +216,40 @@ class CategoryController extends Controller
                 'message' => 'Category has been not deleted'
             ], 401);
         }
+    }
+
+    public function remove_category_section(SectionCategory $section)
+    {
+        $section->delete();
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'Category has been successfully removed from the section.'
+        ], 200);
+    }
+
+    public function assigned()
+    {
+        $categoryIds = SectionCategory::pluck('category_id')->unique()->values()->toArray();
+        $data = Category::whereIn('id', $categoryIds)->get();
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'Assigned category list.',
+            'data' => $data
+        ], 200);
+    }
+
+    public function unassigned()
+    {
+        $categoryIds = SectionCategory::pluck('category_id')->unique()->values()->toArray();
+        $data = Category::whereNotIn('id', $categoryIds)->get();
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'Unassigned category list.',
+            'data' => $data
+        ], 200);
     }
 
 }

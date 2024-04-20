@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\v1\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\VariantStoreRequest;
+use App\Http\Requests\VariantUpdateRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Response;
@@ -25,38 +27,23 @@ class VariantController extends Controller
             ], 404);
         }
     }
-    public function store(Request $request){
-        $validator = Validator::make(request()->all(), [
-
-            'title'=>'required',
-
-            'status'=>'required'
-
-        ]);
+    public function store(VariantStoreRequest $request){
         
-        if ($validator->fails()) {
+        $variant = new Variant;
+        $variant->title = $request->title;
+        $variant->status = $request->status;
+        $variant->save();
+        if($variant){
             return Response::json([
-                'status' => '422',
-                'message' => 'All field are requeired'
-            ], 422);
-            
+                'variant_id' => $variant->id,
+                'status' => '200',
+                'message' => 'variant data has been saved'
+            ], 200);
         }else{
-            $variant = new Variant;
-            $variant->title = $request->title;
-            $variant->status = $request->status;
-            $variant->save();
-            if($variant){
-                return Response::json([
-                    'variant_id' => $variant->id,
-                    'status' => '200',
-                    'message' => 'variant data has been saved'
-                ], 200);
-            }else{
-                return Response::json([
-                    'status' => '401',
-                    'message' => 'variant data has been not saved'
-                ], 401);
-            }
+            return Response::json([
+                'status' => '401',
+                'message' => 'variant data has been not saved'
+            ], 401);
         }
     }
     public function get_single_variant($id){
@@ -74,37 +61,22 @@ class VariantController extends Controller
             ], 404);
         }
     }
-    public function update(Request $request, $id){
-        $validator = Validator::make(request()->all(), [
-
-            'title'=>'required',
-
-            'status'=>'required'
-
-        ]);
-
-        if ($validator->fails()) {
+    public function update(VariantUpdateRequest $request, $id){
+        
+        $variant = Variant::find($id);
+        $variant->title = $request->title;
+        $variant->status = $request->status;
+        $variant->save();
+        if($variant){
             return Response::json([
-                'status' => '422',
-                'message' => 'All field are requeired'
-            ], 422);
-
+                'status' => '200',
+                'message' => 'variant data has been updated'
+            ], 200);
         }else{
-            $variant = Variant::find($id);
-            $variant->title = $request->title;
-            $variant->status = $request->status;
-            $variant->save();
-            if($variant){
-                return Response::json([
-                    'status' => '200',
-                    'message' => 'variant data has been updated'
-                ], 200);
-            }else{
-                return Response::json([
-                    'status' => '401',
-                    'message' => 'variant data has been not updated'
-                ], 401);
-            }
+            return Response::json([
+                'status' => '401',
+                'message' => 'variant data has been not updated'
+            ], 401);
         }
     }
     public function delete($id){

@@ -3,13 +3,19 @@
 namespace App\Http\Controllers\v1\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\BannerStoreRequest;
+use App\Http\Requests\BannerUpdateRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Response;
 use App\Models\Banner;
+use App\Models\SectionBanner;
+use App\Traits\BannerTrait;
 
 class BannerController extends Controller
 {
+    use BannerTrait;
+
     public function banners(){
         $banner = Banner::all();
         if($banner){
@@ -25,58 +31,43 @@ class BannerController extends Controller
             ], 404);
         }
     }
-    public function store(Request $request){
+    public function store(BannerStoreRequest $request){
+        $image = $request->file('image');
 
-        $validator = Validator::make(request()->all(), [
+        $name = time().'.'.$image->getClientOriginalExtension();
 
-            'title'=>'required',
+        $destinationPath = public_path('/images/banners');
 
-            'image'=>'required',
+        $image->move($destinationPath,$name);
 
-            'showtype'=>'required',
+        $banner = new Banner;
+        $banner->section_id = $request->section_id ? $request->section_id[0] : null;
+        $banner->title = $request->title;
+        $banner->description = $request->description;
+        $banner->image = $name;
+        $banner->showtype = $request->showtype;
+        $banner->status = $request->status;
+        $banner->save();
 
-            'status'=>'required'
+        if($request->section_id)
+        {
+            $this->bannerAssignTosection($banner, $request->section_id);
+        }
 
-        ]);
-
-        if ($validator->fails()) {
+        if($banner){
             return Response::json([
-                'status' => '422',
-                'message' => 'All field are requeired'
-            ], 422);
-
+                'status' => '200',
+                'message' => 'banner data has been saved'
+            ], 200);
         }else{
-            $image = $request->file('image');
-
-            $name = time().'.'.$image->getClientOriginalExtension();
-
-            $destinationPath = public_path('/images/banners');
-
-            $image->move($destinationPath,$name);
-
-            $banner = new Banner;
-            $banner->section_id = $request->section_id;
-            $banner->title = $request->title;
-            $banner->description = $request->description;
-            $banner->image = $name;
-            $banner->showtype = $request->showtype;
-            $banner->status = $request->status;
-            $banner->save();
-            if($banner){
-                return Response::json([
-                    'status' => '200',
-                    'message' => 'banner data has been saved'
-                ], 200);
-            }else{
-                return Response::json([
-                    'status' => '401',
-                    'message' => 'banner data has been not saved'
-                ], 401);
-            }
+            return Response::json([
+                'status' => '401',
+                'message' => 'banner data has been not saved'
+            ], 401);
         }
     }
     public function get_single_banner($id){
-        $banner = Banner::findorfail($id);
+        $banner = Banner::with('section_banners.section')->findorfail($id);
         if($banner){
             return Response::json([
                 'status' => '200',
@@ -90,56 +81,43 @@ class BannerController extends Controller
             ], 404);
         }
     }
-    public function update(Request $request, $id){
-        $validator = Validator::make(request()->all(), [
+    public function update(BannerUpdateRequest $request, $id){
+        
+        if($request->hasFile('image')){
+            $image = $request->file('image');
 
-            'title'=>'required',
+            $name = time().'.'.$image->getClientOriginalExtension();
 
-            'showtype'=>'required',
+            $destinationPath = public_path('/images/banners');
 
-            'status'=>'required'
+            $image->move($destinationPath,$name);
+        }
 
-        ]);
+        $banner = Banner::findOrFail($id);
+        $banner->section_id = $request->section_id ? $request->section_id[0] : null;
+        $banner->title = $request->title;
+        $banner->description = $request->description;
+        if($request->hasFile('image')){
+            $banner->image = $name;
+        }
+        $banner->showtype = $request->showtype;
+        $banner->status = $request->status;
+        $banner->save();
 
-        if ($validator->fails()) {
+        if ($request->section_id) {
+            $this->bannerAssignTosection($banner, $request->section_id);
+        }
+
+        if($banner){
             return Response::json([
-                'status' => '422',
-                'message' => 'All field are requeired'
-            ], 422);
-
+                'status' => '200',
+                'message' => 'Banner data updated successfully'
+            ], 200);
         }else{
-
-            if($request->hasFile('image')){
-                $image = $request->file('image');
-
-                $name = time().'.'.$image->getClientOriginalExtension();
-
-                $destinationPath = public_path('/images/banners');
-
-                $image->move($destinationPath,$name);
-            }
-
-            $banner = Banner::findOrFail($id);
-            $banner->section_id = $request->section_id;
-            $banner->title = $request->title;
-            $banner->description = $request->description;
-            if($request->hasFile('image')){
-                $banner->image = $name;
-            }
-            $banner->showtype = $request->showtype;
-            $banner->status = $request->status;
-            $banner->save();
-            if($banner){
-                return Response::json([
-                    'status' => '200',
-                    'message' => 'Banner data updated successfully'
-                ], 200);
-            }else{
-                return Response::json([
-                    'status' => '401',
-                    'message' => 'Banners has been not updated'
-                ], 401);
-            }
+            return Response::json([
+                'status' => '401',
+                'message' => 'Banners has been not updated'
+            ], 401);
         }
     }
     public function delete($id){
@@ -217,5 +195,39 @@ class BannerController extends Controller
                 'message' => 'Banners has been not deleted'
             ], 401);
         }
+    }
+
+    public function remove_banner_section(SectionBanner $section)
+    {
+        $section->delete();
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'Banner has been successfully removed from the section.'
+        ], 200);
+    }
+
+    public function assigned()
+    {
+        $bannerIds = SectionBanner::pluck('banner_id')->unique()->values()->toArray();
+        $data = Banner::whereIn('id', $bannerIds)->get();
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'Assigned banner list.',
+            'data' => $data
+        ], 200);
+    }
+
+    public function unassigned()
+    {
+        $bannerIds = SectionBanner::pluck('banner_id')->unique()->values()->toArray();
+        $data = Banner::whereNotIn('id', $bannerIds)->get();
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'Unassigned banner list.',
+            'data' => $data
+        ], 200);
     }
 }

@@ -23,4 +23,9 @@ class Banner extends Model
     {
         return $this->belongsTo(Section::class);
     }
+
+    public function section_banners()
+    {
+        return $this->hasMany(SectionBanner::class)->select('id', 'section_id', 'banner_id');
+    }
 }

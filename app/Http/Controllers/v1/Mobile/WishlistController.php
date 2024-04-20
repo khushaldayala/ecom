@@ -21,7 +21,9 @@ class WishlistController extends Controller
 
             'price'=>'required',
 
-            'image'=>'required'
+            'image'=>'required',
+            
+            'variant_id' => 'required'
 
         ]);
 
@@ -49,17 +51,17 @@ class WishlistController extends Controller
             if($wishlist){
                 return Response::json([
                     'status' => '200',
-                    'message' => 'wishlist added successfully'
+                    'message' => 'wishlist updated successfully'
                 ], 200);
             }else{
                 return Response::json([
                     'status' => '401',
-                    'message' => 'wishlist has been not added'
+                    'message' => 'wishlist has been not updated'
                 ], 401);
             }
         }
     }
-
+    
     public function remove_wishlist_item(Wishlist $id)
     {
         $wishlist = $id->delete();
@@ -76,7 +78,7 @@ class WishlistController extends Controller
             ], 401);
         }
     }
-
+    
     public function wishlist_list($userId)
     {
         $wishlist = Wishlist::with([
@@ -94,7 +96,7 @@ class WishlistController extends Controller
         }else{
             return Response::json([
                 'status' => '200',
-                'message' => 'wishlist is empty',
+                'message' => 'wishlist has been not get',
                 'data' => $wishlist
             ], 200);
         }

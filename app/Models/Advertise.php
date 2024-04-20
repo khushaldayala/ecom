@@ -23,4 +23,9 @@ class Advertise extends Model
     {
         return $this->belongsTo(Section::class);
     }
+    
+    public function section_advertise()
+    {
+        return $this->hasMany(SectionAdvertise::class)->select('id', 'section_id', 'advertise_id');
+    }
 }

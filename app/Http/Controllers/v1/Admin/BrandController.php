@@ -3,14 +3,20 @@
 namespace App\Http\Controllers\v1\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\BrandStoreRequest;
+use App\Http\Requests\BrandUpdateRequest;
 use Illuminate\Http\Request;
 use App\Models\Brand;
+use App\Models\SectionBrand;
+use App\Traits\BrandTrait;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Str;
 
 class BrandController extends Controller
 {
+    use BrandTrait;
+    
     public function brands(){
         $brand = Brand::all();
         if($brand){
@@ -26,59 +32,45 @@ class BrandController extends Controller
             ], 404);
         }
     }
-    public function store(Request $request){
+    public function store(BrandStoreRequest $request){
 
-        $validator = Validator::make(request()->all(), [
+        $image = $request->file('image');
 
-            'title'=>'required',
+        $name = time().'.'.$image->getClientOriginalExtension();
 
-            'image'=>'required',
+        $destinationPath = public_path('/images/brand');
 
-            'status'=>'required'
+        $image->move($destinationPath,$name);
 
-        ]);
+        $keyword = Str::slug($request->title);
 
-        if ($validator->fails()) {
+        $brand = new Brand;
+        $brand->title = $request->title;
+        $brand->description = $request->description;
+        $brand->image = $name;
+        $brand->keyword = $keyword;
+        $brand->status = $request->status;
+        $brand->section_id = $request->section_id ? $request->section_id[0] : null;
+        $brand->save();
+
+        if ($request->section_id) {
+            $this->bannerAssignTosection($brand, $request->section_id);
+        }
+
+        if($brand){
             return Response::json([
-                'status' => '422',
-                'message' => 'All field are requeired'
-            ], 422);
-
+                'status' => '200',
+                'message' => 'Brand data has been saved'
+            ], 200);
         }else{
-
-            $image = $request->file('image');
-
-            $name = time().'.'.$image->getClientOriginalExtension();
-
-            $destinationPath = public_path('/images/brand');
-
-            $image->move($destinationPath,$name);
-
-            $keyword = Str::slug($request->title);
-
-            $brand = new Brand;
-            $brand->title = $request->title;
-            $brand->description = $request->description;
-            $brand->image = $name;
-            $brand->keyword = $keyword;
-            $brand->status = $request->status;
-            $brand->section_id = $request->section_id;
-            $brand->save();
-            if($brand){
-                return Response::json([
-                    'status' => '200',
-                    'message' => 'Brand data has been saved'
-                ], 200);
-            }else{
-                return Response::json([
-                    'status' => '401',
-                    'message' => 'Brand data has been not saved'
-                ], 401);
-            }
+            return Response::json([
+                'status' => '401',
+                'message' => 'Brand data has been not saved'
+            ], 401);
         }
     }
     public function get_single_brand($id){
-        $brand = Brand::findorfail($id);
+        $brand = Brand::with('section_brands.section')->findorfail($id);
         if($brand){
             return Response::json([
                 'status' => '200',
@@ -92,56 +84,46 @@ class BrandController extends Controller
             ], 404);
         }
     }
-    public function update(Request $request, $id){
-        $validator = Validator::make(request()->all(), [
+    public function update(BrandUpdateRequest $request, $id){
+        
+        if($request->hasFile('image')){
 
-            'title'=>'required',
+            $image = $request->file('image');
 
-            'status'=>'required'
+            $name = time().'.'.$image->getClientOriginalExtension();
 
-        ]);
+            $destinationPath = public_path('/images/brand');
 
-        if ($validator->fails()) {
+            $image->move($destinationPath,$name);
+        }
+
+        $keyword = Str::slug($request->title);
+
+        $brand = Brand::find($id);
+        $brand->title = $request->title;
+        $brand->description = $request->description;
+        if($request->hasFile('image')){
+            $brand->image = $name;
+        }
+        $brand->keyword = $keyword;
+        $brand->status = $request->status;
+        $brand->section_id = $request->section_id ? $request->section_id[0] : null;
+        $brand->save();
+
+        if ($request->section_id) {
+            $this->bannerAssignTosection($brand, $request->section_id);
+        }
+
+        if($brand){
             return Response::json([
-                'status' => '422',
-                'message' => 'All field are requeired'
-            ], 422);
-
+                'status' => '200',
+                'message' => 'Brand data has been updated'
+            ], 200);
         }else{
-            if($request->hasFile('image')){
-
-                $image = $request->file('image');
-
-                $name = time().'.'.$image->getClientOriginalExtension();
-
-                $destinationPath = public_path('/images/brand');
-
-                $image->move($destinationPath,$name);
-            }
-
-            $keyword = Str::slug($request->title);
-
-            $brand = Brand::find($id);
-            $brand->title = $request->title;
-            $brand->description = $request->description;
-            if($request->hasFile('image')){
-                $brand->image = $name;
-            }
-            $brand->keyword = $keyword;
-            $brand->status = $request->status;
-            $brand->section_id = $request->section_id;
-            $brand->save();
-            if($brand){
-                return Response::json([
-                    'status' => '200',
-                    'message' => 'Brand data has been updated'
-                ], 200);
-            }else{
-                return Response::json([
-                    'status' => '401',
-                    'message' => 'Brand data has been not updated'
-                ], 401);
-            }
+            return Response::json([
+                'status' => '401',
+                'message' => 'Brand data has been not updated'
+            ], 401);
         }
     }
     public function delete($id){
@@ -220,5 +202,39 @@ class BrandController extends Controller
                 'message' => 'brands has been not deleted'
             ], 401);
         }
+    }
+
+    public function remove_brand_section(SectionBrand $section)
+    {
+        $section->delete();
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'Brand has been successfully removed from the section.'
+        ], 200);
+    }
+
+    public function assigned()
+    {
+        $brandIds = SectionBrand::pluck('brand_id')->unique()->values()->toArray();
+        $data = Brand::whereIn('id', $brandIds)->get();
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'Assigned brand list.',
+            'data' => $data
+        ], 200);
+    }
+
+    public function unassigned()
+    {
+        $brandIds = SectionBrand::pluck('brand_id')->unique()->values()->toArray();
+        $data = Brand::whereNotIn('id', $brandIds)->get();
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'Unassigned brand list.',
+            'data' => $data
+        ], 200);
     }
 }

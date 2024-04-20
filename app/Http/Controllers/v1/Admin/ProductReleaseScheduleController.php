@@ -25,8 +25,7 @@ class ProductReleaseScheduleController extends Controller
                 ->whereNull('is_done');
         })
         ->get();
-
-        if($products->count() > 0){
+        if(count($products)>0){
             return Response::json([
                 'status' => '200',
                 'message' => 'Inactive Products list get successfully',
@@ -40,7 +39,6 @@ class ProductReleaseScheduleController extends Controller
             ], 200);
         }
     }
-
     public function productSchedules()
     {
         $ProductReleaseSchedule = DB::table('product_release_schedules')
@@ -48,7 +46,7 @@ class ProductReleaseScheduleController extends Controller
         ->groupBy('slug')
         ->get();
 
-        if(count($ProductReleaseSchedule)>0){
+        if($ProductReleaseSchedule){
             return Response::json([
                 'status' => '200',
                 'message' => 'Product schedule list get successfully',
@@ -61,7 +59,6 @@ class ProductReleaseScheduleController extends Controller
             ], 404);
         }
     }
-
     public function store(Request $request)
     {
         if (is_array($request->product_id)) {
@@ -92,7 +89,6 @@ class ProductReleaseScheduleController extends Controller
             'message' => 'Product schedule created successfully'
         ], 200);
     }
-
     public function delete($slug)
     {
         $productschedule = ProductReleaseSchedule::where('slug', $slug)->delete();
@@ -108,7 +104,7 @@ class ProductReleaseScheduleController extends Controller
             ], 401);
         }
     }
-
+    
     public function get_single_schedule_deltails($slug)
     {
         $productschedule = ProductReleaseSchedule::where('slug', $slug)->get();

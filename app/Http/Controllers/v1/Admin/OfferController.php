@@ -3,13 +3,19 @@
 namespace App\Http\Controllers\v1\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\OfferStoreRequest;
+use App\Http\Requests\OfferUpdateRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Response;
 use App\Models\Offer;
+use App\Models\SectionOffer;
+use App\Traits\OfferTrait;
 
 class OfferController extends Controller
 {
+    use OfferTrait;
+
     public function offers(){
         $offer = Offer::all();
         if($offer){
@@ -25,57 +31,51 @@ class OfferController extends Controller
             ], 404);
         }
     }
-    public function store(Request $request){
-        $validator = Validator::make(request()->all(), [
+    public function store(OfferStoreRequest $request){
+        
+        $image = $request->file('image');
 
-            'title'=>'required',
+        $name = time().'.'.$image->getClientOriginalExtension();
 
-            'image'=>'required',
+        $destinationPath = public_path('/images/offers');
 
-            'status'=>'required'
+        $image->move($destinationPath,$name);
 
-        ]);
+        $offer = new Offer;
+        $offer->section_id = $request->section_id ? $request->section_id[0] : null;
+        $offer->title = $request->title;
+        $offer->description = $request->description;
+        $offer->image = $name;
+        $offer->coupon_code = $request->coupon_code;
+        $offer->link = $request->link;
+        $offer->type = $request->type;
+        $offer->discount = $request->discount;
+        $offer->status = $request->status;
+        $offer->save();
 
-        if ($validator->fails()) {
+        if($request->product_ids)
+        {
+            $this->productAssignToOffer($offer, $request->product_ids);
+        }
+
+        if ($request->section_id) {
+            $this->offerAssignTosection($offer, $request->section_id);
+        }
+
+        if($offer){
             return Response::json([
-                'status' => '422',
-                'message' => 'All field are requeired'
-            ], 422);
-
+                'status' => '200',
+                'message' => 'offer data has been saved'
+            ], 200);
         }else{
-            $image = $request->file('image');
-
-            $name = time().'.'.$image->getClientOriginalExtension();
-
-            $destinationPath = public_path('/images/offers');
-
-            $image->move($destinationPath,$name);
-
-            $offer = new Offer;
-            $offer->section_id = $request->section_id;
-            $offer->title = $request->title;
-            $offer->description = $request->description;
-            $offer->image = $name;
-            $offer->coupon_code = $request->coupon_code;
-            $offer->link = $request->link;
-            $offer->discount = $request->discount;
-            $offer->status = $request->status;
-            $offer->save();
-            if($offer){
-                return Response::json([
-                    'status' => '200',
-                    'message' => 'offer data has been saved'
-                ], 200);
-            }else{
-                return Response::json([
-                    'status' => '401',
-                    'message' => 'offer data has been not saved'
-                ], 401);
-            }
+            return Response::json([
+                'status' => '401',
+                'message' => 'offer data has been not saved'
+            ], 401);
         }
     }
     public function get_single_offer($id){
-        $offer = Offer::findorfail($id);
+        $offer = Offer::with('section_offers.section', 'offer_product.product')->findorfail($id);
         if($offer){
             return Response::json([
                 'status' => '200',
@@ -89,56 +89,51 @@ class OfferController extends Controller
             ], 404);
         }
     }
-    public function update(Request $request, $id){
-        $validator = Validator::make(request()->all(), [
+    public function update(OfferUpdateRequest $request, $id){
+        
+        if($request->hasFile('image')){
+            $image = $request->file('image');
 
-            'title'=>'required',
+            $name = time().'.'.$image->getClientOriginalExtension();
 
-            'status'=>'required'
+            $destinationPath = public_path('/images/offers');
 
-        ]);
+            $image->move($destinationPath,$name);
+        }
 
-        if ($validator->fails()) {
+        $offer = Offer::find($id);
+        $offer->section_id = $request->section_id ? $request->section_id[0] : null;
+        $offer->title = $request->title;
+        $offer->description = $request->description;
+        if($request->hasFile('image')){
+            $offer->image = $name;
+        }
+        $offer->coupon_code = $request->coupon_code;
+        $offer->link = $request->link;
+        $offer->type = $request->type;
+        $offer->discount = $request->discount;
+        $offer->status = $request->status;
+        $offer->save();
+
+        if ($request->product_ids) {
+            $this->productAssignToOffer($offer, $request->product_ids);
+        }
+
+        if($request->section_id)
+        {
+            $this->offerAssignTosection($offer, $request->section_id);
+        }
+
+        if($offer){
             return Response::json([
-                'status' => '422',
-                'message' => 'All field are requeired'
-            ], 422);
-
+                'status' => '200',
+                'message' => 'offer data has been Updated'
+            ], 200);
         }else{
-
-            if($request->hasFile('image')){
-                $image = $request->file('image');
-
-                $name = time().'.'.$image->getClientOriginalExtension();
-
-                $destinationPath = public_path('/images/offers');
-
-                $image->move($destinationPath,$name);
-            }
-
-            $offer = Offer::find($id);
-            $offer->section_id = $request->section_id;
-            $offer->title = $request->title;
-            $offer->description = $request->description;
-            if($request->hasFile('image')){
-                $offer->image = $name;
-            }
-            $offer->coupon_code = $request->coupon_code;
-            $offer->link = $request->link;
-            $offer->discount = $request->discount;
-            $offer->status = $request->status;
-            $offer->save();
-            if($offer){
-                return Response::json([
-                    'status' => '200',
-                    'message' => 'offer data has been Updated'
-                ], 200);
-            }else{
-                return Response::json([
-                    'status' => '401',
-                    'message' => 'offer data has been not Updated'
-                ], 401);
-            }
+            return Response::json([
+                'status' => '401',
+                'message' => 'offer data has been not Updated'
+            ], 401);
         }
     }
     public function delete($id){
@@ -216,5 +211,39 @@ class OfferController extends Controller
                 'message' => 'Offers has been not deleted'
             ], 401);
         }
+    }
+
+    public function remove_offer_section(SectionOffer $section)
+    {
+        $section->delete();
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'Offer has been successfully removed from the section.'
+        ], 200);
+    }
+
+    public function assigned()
+    {
+        $offerIds = SectionOffer::pluck('offer_id')->unique()->values()->toArray();
+        $data = Offer::whereIn('id', $offerIds)->get();
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'Assigned offer list.',
+            'data' => $data
+        ], 200);
+    }
+
+    public function unassigned()
+    {
+        $offerIds = SectionOffer::pluck('offer_id')->unique()->values()->toArray();
+        $data = Offer::whereNotIn('id', $offerIds)->get();
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'Unassigned offer list.',
+            'data' => $data
+        ], 200);
     }
 }

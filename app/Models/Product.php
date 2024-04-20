@@ -70,4 +70,13 @@ class Product extends Model
     {
         return $this->belongsTo(Brand::class);
     }
+    public function section_products()
+    {
+        return $this->hasMany(SectionProduct::class)->select('id', 'section_id', 'product_id');
+    }
+
+    public function offer_product()
+    {
+        return $this->hasMany(OfferProduct::class)->select('id', 'product_id', 'offer_id');
+    }
 }
