@@ -20,4 +20,9 @@ class SectionAdvertise extends Model
     {
         return $this->belongsTo(Section::class)->select('id', 'title');
     }
+
+    public function advertise()
+    {
+        return $this->belongsTo(Advertise::class);
+    }
 }

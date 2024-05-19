@@ -32,7 +32,6 @@ class CategoryStoreRequest extends FormRequest
 
             'status' => 'required',
 
-            'portrait_image' => 'required'
         ];
     }
 

@@ -20,4 +20,9 @@ class SectionBanner extends Model
     {
         return $this->belongsTo(Section::class)->select('id', 'title');
     }
+
+    public function banner()
+    {
+        return $this->belongsTo(Banner::class);
+    }
 }

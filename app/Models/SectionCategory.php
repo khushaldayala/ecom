@@ -20,4 +20,9 @@ class SectionCategory extends Model
     {
         return $this->belongsTo(Section::class)->select('id', 'title');
     }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
 }

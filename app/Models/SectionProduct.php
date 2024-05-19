@@ -20,4 +20,9 @@ class SectionProduct extends Model
     {
         return $this->belongsTo(Section::class)->select('id', 'title');
     }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
 }

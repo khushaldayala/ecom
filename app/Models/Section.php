@@ -47,4 +47,35 @@ class Section extends Model
     {
         return $this->hasMany(Brand::class);
     }
+
+    public function section_banners()
+    {
+        return $this->hasMany(SectionBanner::class)->select('id', 'section_id', 'banner_id');
+    }
+
+    public function section_categories()
+    {
+        return $this->hasMany(SectionCategory::class)->select('id', 'section_id', 'category_id');
+    }
+
+    public function section_brands()
+    {
+        return $this->hasMany(SectionBrand::class)->select('id', 'section_id', 'brand_id');
+    }
+
+    public function section_advertise()
+    {
+        return $this->hasMany(SectionAdvertise::class)->select('id', 'section_id', 'advertise_id');
+    }
+
+    public function section_offers()
+    {
+        return $this->hasMany(SectionOffer::class)->select('id', 'section_id', 'offer_id');
+    }
+
+    public function section_products()
+    {
+        return $this->hasMany(SectionProduct::class)->select('id', 'section_id', 'product_id');
+    }
+ 
 }

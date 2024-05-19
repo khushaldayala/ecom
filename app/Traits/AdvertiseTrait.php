@@ -8,6 +8,7 @@ trait AdvertiseTrait
 {
     public function advertiseAssignTosection($advertise, $sectionIds)
     {
+        SectionAdvertise::where('banner_id', $advertise->id)->delete();
         foreach ($sectionIds as $section) {
             SectionAdvertise::create([
                 'section_id' => $section,
