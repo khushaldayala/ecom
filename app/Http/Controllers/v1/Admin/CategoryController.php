@@ -41,19 +41,10 @@ class CategoryController extends Controller
 
         $image->move($destinationPath,$name);
 
-        $image1 = $request->file('portrait_image');
-
-        $name1 = time().'0101'.'.'.$image1->getClientOriginalExtension();
-
-        $destinationPath1 = public_path('/images/categories');
-
-        $image1->move($destinationPath1,$name1);
-
         $category = new Category;
         $category->title = $request->title;
         $category->description = $request->description;
         $category->image = $name;
-        $category->portrait_image = $name1;
         $category->status = $request->status;
         $category->section_id = $request->section_id ? $request->section_id[0] : null;
         $category->save();
@@ -100,24 +91,12 @@ class CategoryController extends Controller
 
             $image->move($destinationPath,$name);
         }
-        if($request->hasFile('portrait_image')){
-            $image1 = $request->file('portrait_image');
-
-            $name1 = time().'.'.$image1->getClientOriginalExtension();
-
-            $destinationPath1 = public_path('/images/categories');
-
-            $image1->move($destinationPath1,$name1);
-        }
         $category = Category::find($id);
         $category->title = $request->title;
         $category->description = $request->description;
         if($request->hasFile('image')){
             $category->image = $name;
         };
-        if($request->hasFile('portrait_image')){
-            $category->portrait_image = $name1;
-        }
         $category->status = $request->status;
         $category->section_id = $request->section_id ? $request->section_id[0] : null;
         $category->save();
