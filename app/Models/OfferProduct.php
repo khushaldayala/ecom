@@ -18,7 +18,7 @@ class OfferProduct extends Model
 
     public function product()
     {
-        return $this->belongsTo(Product::class)->select('id', 'product_name');
+        return $this->belongsTo(Product::class);
     }
 
     public function offer()

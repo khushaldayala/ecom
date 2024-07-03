@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Response;
 use App\Models\Variant;
+use App\Models\VariantOption;
 
 class VariantController extends Controller
 {
@@ -28,11 +29,22 @@ class VariantController extends Controller
         }
     }
     public function store(VariantStoreRequest $request){
-        
+       
         $variant = new Variant;
         $variant->title = $request->title;
         $variant->status = $request->status;
         $variant->save();
+            
+        if (count($request->option) > 0) {
+            foreach ($request->option as $key => $option) {
+                $variantoption = new VariantOption();
+                $variantoption->variant_id = $variant->id;
+                $variantoption->option = $option;
+                $variantoption->status = $request->option_status[$key];
+                $variantoption->save();
+            }
+        }
+        
         if($variant){
             return Response::json([
                 'variant_id' => $variant->id,
@@ -45,6 +57,7 @@ class VariantController extends Controller
                 'message' => 'variant data has been not saved'
             ], 401);
         }
+        
     }
     public function get_single_variant($id){
         $variant = Variant::findorfail($id);
@@ -67,6 +80,17 @@ class VariantController extends Controller
         $variant->title = $request->title;
         $variant->status = $request->status;
         $variant->save();
+            
+        if (count($request->option) > 0) {
+            foreach ($request->option as $key => $option) {
+                $variantoption = new VariantOption();
+                $variantoption->variant_id = $variant->id;
+                $variantoption->option = $option;
+                $variantoption->status = $request->option_status[$key];
+                $variantoption->save();
+            }
+        }
+            
         if($variant){
             return Response::json([
                 'status' => '200',
@@ -78,6 +102,7 @@ class VariantController extends Controller
                 'message' => 'variant data has been not updated'
             ], 401);
         }
+        
     }
     public function delete($id){
         $variant = Variant::find($id);

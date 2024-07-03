@@ -20,4 +20,9 @@ class SectionOffer extends Model
     {
         return $this->belongsTo(Section::class)->select('id', 'title');
     }
+
+    public function offer()
+    {
+        return $this->belongsTo(Offer::class);
+    }
 }

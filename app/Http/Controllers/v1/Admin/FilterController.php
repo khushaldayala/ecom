@@ -3,12 +3,10 @@
 namespace App\Http\Controllers\v1\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\FilterStoreRequest;
-use App\Http\Requests\FilterUpdateRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Filter;
-use Illuminate\Support\Facades\Response;
+use Response;
 
 class FilterController extends Controller
 {
@@ -27,25 +25,38 @@ class FilterController extends Controller
             ], 404);
         }
     }
-    public function store(FilterStoreRequest $request){
-        
-        $filter = new Filter;
-        $filter->title = $request->title;
-        $filter->description = $request->description;
-        $filter->status = $request->status;
-        $filter->save();
+    public function store(Request $request){
+        $validator = Validator::make(request()->all(), [
 
-        if($filter){
+            'title'=>'required'
+
+        ]);
+
+        if ($validator->fails()) {
             return Response::json([
-                'filter_id' => $filter->id,
-                'status' => '201',
-                'message' => 'Filter created successfully'
-            ], 201);
+                'status' => '422',
+                'message' => 'Title are requeired'
+            ], 422);
+
         }else{
-            return Response::json([
-                'status' => '401',
-                'message' => 'Filter create request fail'
-            ], 401);
+            $filter = new Filter;
+            $filter->title = $request->title;
+            $filter->description = $request->description;
+            $filter->status = $request->status;
+            $filter->save();
+
+            if($filter){
+                return Response::json([
+                    'filter_id' => $filter->id,
+                    'status' => '201',
+                    'message' => 'Filter created successfully'
+                ], 201);
+            }else{
+                return Response::json([
+                    'status' => '401',
+                    'message' => 'Filter create request fail'
+                ], 401);
+            }
         }
     }
     public function get_single_filter($id){
@@ -63,24 +74,38 @@ class FilterController extends Controller
             ], 404);
         }
     }
-    public function update(FilterUpdateRequest $request, $id){
+    public function update(Request $request, $id){
 
-        $filter = Filter::find($id);
-        $filter->title = $request->title;
-        $filter->description = $request->description;
-        $filter->status = $request->status;
-        $filter->save();
+        $validator = Validator::make(request()->all(), [
 
-        if($filter){
+            'title'=>'required'
+
+        ]);
+
+        if ($validator->fails()) {
             return Response::json([
-                'status' => '201',
-                'message' => 'Filter updated successfully'
-            ], 201);
+                'status' => '422',
+                'message' => 'Title are requeired'
+            ], 422);
+
         }else{
-            return Response::json([
-                'status' => '401',
-                'message' => 'Filter updated request fail'
-            ], 401);
+            $filter = Filter::find($id);
+            $filter->title = $request->title;
+            $filter->description = $request->description;
+            $filter->status = $request->status;
+            $filter->save();
+
+            if($filter){
+                return Response::json([
+                    'status' => '201',
+                    'message' => 'Filter updated successfully'
+                ], 201);
+            }else{
+                return Response::json([
+                    'status' => '401',
+                    'message' => 'Filter updated request fail'
+                ], 401);
+            }
         }
     }
     public function delete($id){

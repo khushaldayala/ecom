@@ -183,9 +183,15 @@ Route::group(array('prefix' => 'v1'), function () {
         Route::delete('trash_offer_delete/{id}', 'trash_offer_delete')->name('trash_offer_delete');
         Route::get('all_trash_offer_delete', 'all_trash_offer_delete')->name('all_trash_offer_delete');
         Route::delete('remove_offer_section/{section}', 'remove_offer_section')->name('remove_offer_section');
+        Route::delete('remove_product_offer/{productId}/{offerId}', 'remove_product_offer')->name('remove_product_offer');
 
         Route::get('assigned_offer', 'assigned')->name('assigned_offer');
         Route::get('unassigned_offer', 'unassigned')->name('unassigned_offer');
+
+        Route::get('assigned_offer_products/{offer_id}', 'assigned_products')->name('assigned_offer_products');
+        Route::get('unassigned_offer_products', 'unassigned_products')->name('unassigned_offer_products');
+
+        Route::get('offer_search', 'search')->name('offer_search');
     });
 
     Route::controller(VariantController::class)->group(function () {

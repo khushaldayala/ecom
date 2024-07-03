@@ -16,7 +16,6 @@ class AdvertiseController extends Controller
 {
     use AdvertiseTrait;
 
-    // This is the testing for Git Pipline
     public function advertises()
     {
         $advertise = Advertise::all();
@@ -45,7 +44,6 @@ class AdvertiseController extends Controller
         $image->move($destinationPath, $name);
 
         $advertise = new advertise;
-        $advertise->section_id = $request->section_id ? $request->section_id[0] : null;
         $advertise->title = $request->title;
         $advertise->description = $request->description;
         $advertise->image = $name;
@@ -98,7 +96,6 @@ class AdvertiseController extends Controller
         }
 
         $advertise = advertise::find($id);
-        $advertise->section_id = $request->section_id ? $request->section_id[0] : null;
         $advertise->title = $request->title;
         $advertise->description = $request->description;
         if ($request->hasFile('image')) {

@@ -40,13 +40,10 @@ class ProductController extends Controller
         $product = new Product;
         $product->category_id = $request->category_id;
         $product->subcategory_id = $request->subcategory_id;
-        $product->fabric_id = $request->fabric_id;
         $product->brand_id = $request->brand_id;
-        $product->section_id = $request->section_id ? $request->section_id[0] : null;
         $product->wishlist = '0';
         $product->product_name = $request->product_name;
         $product->description = $request->description;
-        $product->more_info = $request->more_info;
         $product->status = $request->status;
         $product->save();
 
@@ -150,13 +147,10 @@ class ProductController extends Controller
         $product = Product::find($id);
         $product->category_id = $request->category_id;
         $product->subcategory_id = $request->subcategory_id;
-        $product->fabric_id = $request->fabric_id;
         $product->brand_id = $request->brand_id;
-        $product->section_id = $request->section_id ? $request->section_id[0] : null;
         $product->wishlist = '0';
         $product->product_name = $request->product_name;
         $product->description = $request->description;
-        $product->more_info = $request->more_info;
         $product->status = $request->status;
         $product->update();
 

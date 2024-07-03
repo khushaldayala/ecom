@@ -16,12 +16,18 @@ class SectionController extends Controller
     use SectionTrait;
 
     public function sections(){
-        $section = Section::all();
-        if($section){
+        $sections = Section::all();
+
+        foreach ($sections as $section) {
+            $sectionCount = $this->assignedItemsCount($section);
+            $section->items_count = $sectionCount;
+        }
+
+        if($sections){
             return Response::json([
                 'status' => '200',
                 'message' => 'Sections list get successfully',
-                'data' => $section
+                'data' => $sections
             ], 200);
         }else{
             return Response::json([
@@ -47,13 +53,12 @@ class SectionController extends Controller
         $section->end_point = $request->end_point;
         $section->order = $maxOrder;
         $section->dlink = $request->dlink;
-        $section->assign_type = $request->assign_type;
         $section->status = $request->status;
         $section->save();
 
         if($request->assignIds)
         {
-            $this->assignToSection($request->assign_type, $section, $request->assignIds);
+            $this->assignToSection($request->keywords, $section, $request->assignIds);
         }
 
         if($section){
@@ -71,11 +76,12 @@ class SectionController extends Controller
     }
     public function get_single_section($id){
         $section = Section::findorfail($id);
+        $assigned_data = $this->assignedItems($section);
         if($section){
             return Response::json([
                 'status' => '200',
                 'message' => 'Sections data get successfully',
-                'data' => $section
+                'data' => $assigned_data,
             ], 200);
         }else{
             return Response::json([
@@ -94,12 +100,11 @@ class SectionController extends Controller
         $section->end_point = $request->end_point;
         $section->order = $request->order;
         $section->dlink = $request->dlink;
-        $section->assign_type = $request->assign_type;
         $section->status = $request->status;
         $section->save();
 
         if ($request->assignIds) {
-            $this->assignToSection($request->assign_type, $section, $request->assignIds);
+            $this->assignToSection($request->keywords, $section, $request->assignIds);
         }
 
         if($section){
@@ -116,13 +121,11 @@ class SectionController extends Controller
     }
     public function delete($id){
         $section = Section::find($id);
-        $section->delete();
-        $section->products()->update(['section_id' => null]);
-        $section->advertise()->update(['section_id' => null]);
-        $section->banner()->update(['section_id' => null]);
-        $section->category()->update(['section_id' => null]);
-        $section->offer()->update(['section_id' => null]);
-        $section->brand()->update(['section_id' => null]);
+        if($section)
+        {
+            $this->removeItemsSection($section);
+            $section->delete();
+        }
         if($section){
             return Response::json([
                 'status' => '200',

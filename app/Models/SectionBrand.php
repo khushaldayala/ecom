@@ -20,4 +20,9 @@ class SectionBrand extends Model
     {
         return $this->belongsTo(Section::class)->select('id', 'title');
     }
+
+    public function brand()
+    {
+        return $this->belongsTo(Brand::class);
+    }
 }
