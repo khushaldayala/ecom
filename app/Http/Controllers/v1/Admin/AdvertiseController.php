@@ -16,7 +16,6 @@ class AdvertiseController extends Controller
 {
     use AdvertiseTrait;
 
-    // This is the testing for Git Pipline
     public function advertises()
     {
         $advertise = Advertise::all();

@@ -46,7 +46,6 @@ class CategoryController extends Controller
         $category->description = $request->description;
         $category->image = $name;
         $category->status = $request->status;
-        $category->section_id = $request->section_id ? $request->section_id[0] : null;
         $category->save();
 
         if ($request->section_id) {
@@ -98,7 +97,6 @@ class CategoryController extends Controller
             $category->image = $name;
         };
         $category->status = $request->status;
-        $category->section_id = $request->section_id ? $request->section_id[0] : null;
         $category->save();
 
         if ($request->section_id) {

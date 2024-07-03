@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\v1\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\FabricStoreRequest;
-use App\Http\Requests\FabricUpdateRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Response;
+use Response;
 use App\Models\Fabric;
 
 class FabricController extends Controller
@@ -28,23 +26,40 @@ class FabricController extends Controller
             ], 404);
         }
     }
-    public function store(FabricStoreRequest $request){
+    public function store(Request $request){
+        $validator = Validator::make(request()->all(), [
+
+            'fab_title'=>'required',
+
+            'category_id'=>'required',
+
+            'status'=>'required'
+
+        ]);
         
-        $fabric = new Fabric;
-        $fabric->fab_title = $request->fab_title;
-        $fabric->category_id = $request->category_id;
-        $fabric->status = $request->status;
-        $fabric->save();
-        if($fabric){
+        if ($validator->fails()) {
             return Response::json([
-                'status' => '200',
-                'message' => 'Fabric data has been saved'
-            ], 200);
+                'status' => '422',
+                'message' => 'All field are requeired'
+            ], 422);
+            
         }else{
-            return Response::json([
-                'status' => '401',
-                'message' => 'Fabric data has been not saved'
-            ], 401);
+            $fabric = new Fabric;
+            $fabric->fab_title = $request->fab_title;
+            $fabric->category_id = $request->category_id;
+            $fabric->status = $request->status;
+            $fabric->save();
+            if($fabric){
+                return Response::json([
+                    'status' => '200',
+                    'message' => 'Fabric data has been saved'
+                ], 200);
+            }else{
+                return Response::json([
+                    'status' => '401',
+                    'message' => 'Fabric data has been not saved'
+                ], 401);
+            }
         }
     }
     public function get_single_fabric($id){
@@ -62,23 +77,40 @@ class FabricController extends Controller
             ], 404);
         }
     }
-    public function update(FabricUpdateRequest $request, $id){
+    public function update(Request $request, $id){
+        $validator = Validator::make(request()->all(), [
+
+            'fab_title'=>'required',
+
+            'category_id'=>'required',
+
+            'status'=>'required'
+
+        ]);
         
-        $fabric = Fabric::find($id);
-        $fabric->fab_title = $request->fab_title;
-        $fabric->category_id = $request->category_id;
-        $fabric->status = $request->status;
-        $fabric->save();
-        if($fabric){
+        if ($validator->fails()) {
             return Response::json([
-                'status' => '200',
-                'message' => 'Fabric data has been Updated'
-            ], 200);
+                'status' => '422',
+                'message' => 'All field are requeired'
+            ], 422);
+            
         }else{
-            return Response::json([
-                'status' => '401',
-                'message' => 'Fabric data has been not Updated'
-            ], 401);
+            $fabric = Fabric::find($id);
+            $fabric->fab_title = $request->fab_title;
+            $fabric->category_id = $request->category_id;
+            $fabric->status = $request->status;
+            $fabric->save();
+            if($fabric){
+                return Response::json([
+                    'status' => '200',
+                    'message' => 'Fabric data has been Updated'
+                ], 200);
+            }else{
+                return Response::json([
+                    'status' => '401',
+                    'message' => 'Fabric data has been not Updated'
+                ], 401);
+            }
         }
     }
     public function delete($id){

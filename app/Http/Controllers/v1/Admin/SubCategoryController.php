@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\v1\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\SubCategoryStoreRequest;
-use App\Http\Requests\SubCategoryUpdateRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Response;
+use Response;
 use App\Models\Subcategory;
 
 class SubCategoryController extends Controller
@@ -28,34 +26,55 @@ class SubCategoryController extends Controller
             ], 404);
         }
     }
-    public function store(SubCategoryStoreRequest $request){
-       
-        $image = $request->file('sub_image');
+    public function store(Request $request){
+        $validator = Validator::make(request()->all(), [
 
-        $name = time().'.'.$image->getClientOriginalExtension();
+            'category_id'=>'required',
 
-        $destinationPath = public_path('/images/subcategory');
+            'fabric_id'=>'required',
 
-        $image->move($destinationPath,$name);
+            'sub_title'=>'required',
 
-        $subcategory = new Subcategory;
-        $subcategory->category_id = $request->category_id;
-        $subcategory->fabric_id = $request->fabric_id;
-        $subcategory->sub_image = $name;
-        $subcategory->sub_title = $request->sub_title;
-        $subcategory->sub_description = $request->sub_description;
-        $subcategory->status = $request->status;
-        $subcategory->save();
-        if($subcategory){
+            'sub_image'=>'required',
+
+            'status'=>'required'
+
+        ]);
+
+        if ($validator->fails()) {
             return Response::json([
-                'status' => '200',
-                'message' => 'Sub-category data has been saved'
-            ], 200);
+                'status' => '422',
+                'message' => 'All field are requeired'
+            ], 422);
+
         }else{
-            return Response::json([
-                'status' => '401',
-                'message' => 'Sub-category data has been not saved'
-            ], 401);
+            $image = $request->file('sub_image');
+
+            $name = time().'.'.$image->getClientOriginalExtension();
+
+            $destinationPath = public_path('/images/subcategory');
+
+            $image->move($destinationPath,$name);
+
+            $subcategory = new Subcategory;
+            $subcategory->category_id = $request->category_id;
+            $subcategory->fabric_id = $request->fabric_id;
+            $subcategory->sub_image = $name;
+            $subcategory->sub_title = $request->sub_title;
+            $subcategory->sub_description = $request->sub_description;
+            $subcategory->status = $request->status;
+            $subcategory->save();
+            if($subcategory){
+                return Response::json([
+                    'status' => '200',
+                    'message' => 'Sub-category data has been saved'
+                ], 200);
+            }else{
+                return Response::json([
+                    'status' => '401',
+                    'message' => 'Sub-category data has been not saved'
+                ], 401);
+            }
         }
     }
     public function get_single_subcategory($id){
@@ -73,38 +92,57 @@ class SubCategoryController extends Controller
             ], 404);
         }
     }
-    public function update(SubCategoryUpdateRequest $request, $id){
-        
-        if($request->hasFile('sub_image')){
+    public function update(Request $request, $id){
+        $validator = Validator::make(request()->all(), [
 
-            $image = $request->file('sub_image');
+            'category_id'=>'required',
 
-            $name = time().'.'.$image->getClientOriginalExtension();
+            'fabric_id'=>'required',
 
-            $destinationPath = public_path('/images/subcategory');
+            'sub_title'=>'required',
 
-            $image->move($destinationPath,$name);
-        }
-        $subcategory = Subcategory::find($id);
-        $subcategory->category_id = $request->category_id;
-        $subcategory->fabric_id = $request->fabric_id;
-        if($request->hasFile('sub_image')){
-            $subcategory->sub_image = $name;
-        }
-        $subcategory->sub_title = $request->sub_title;
-        $subcategory->sub_description = $request->sub_description;
-        $subcategory->status = $request->status;
-        $subcategory->save();
-        if($subcategory){
+            'status'=>'required'
+
+        ]);
+
+        if ($validator->fails()) {
             return Response::json([
-                'status' => '200',
-                'message' => 'Sub-category data has been Updated'
-            ], 200);
+                'status' => '422',
+                'message' => 'All field are requeired'
+            ], 422);
+
         }else{
-            return Response::json([
-                'status' => '401',
-                'message' => 'Sub-category data has been not Updated'
-            ], 401);
+            if($request->hasFile('sub_image')){
+
+                $image = $request->file('sub_image');
+
+                $name = time().'.'.$image->getClientOriginalExtension();
+
+                $destinationPath = public_path('/images/subcategory');
+
+                $image->move($destinationPath,$name);
+            }
+            $subcategory = Subcategory::find($id);
+            $subcategory->category_id = $request->category_id;
+            $subcategory->fabric_id = $request->fabric_id;
+            if($request->hasFile('sub_image')){
+                $subcategory->sub_image = $name;
+            }
+            $subcategory->sub_title = $request->sub_title;
+            $subcategory->sub_description = $request->sub_description;
+            $subcategory->status = $request->status;
+            $subcategory->save();
+            if($subcategory){
+                return Response::json([
+                    'status' => '200',
+                    'message' => 'Sub-category data has been Updated'
+                ], 200);
+            }else{
+                return Response::json([
+                    'status' => '401',
+                    'message' => 'Sub-category data has been not Updated'
+                ], 401);
+            }
         }
     }
     public function delete($id){

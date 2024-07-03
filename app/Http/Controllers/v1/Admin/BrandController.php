@@ -50,7 +50,6 @@ class BrandController extends Controller
         $brand->image = $name;
         $brand->keyword = $keyword;
         $brand->status = $request->status;
-        $brand->section_id = $request->section_id ? $request->section_id[0] : null;
         $brand->save();
 
         if ($request->section_id) {
@@ -107,7 +106,6 @@ class BrandController extends Controller
         }
         $brand->keyword = $keyword;
         $brand->status = $request->status;
-        $brand->section_id = $request->section_id ? $request->section_id[0] : null;
         $brand->save();
 
         if ($request->section_id) {

@@ -41,7 +41,6 @@ class BannerController extends Controller
         $image->move($destinationPath,$name);
 
         $banner = new Banner;
-        $banner->section_id = $request->section_id ? $request->section_id[0] : null;
         $banner->title = $request->title;
         $banner->description = $request->description;
         $banner->image = $name;
@@ -94,7 +93,6 @@ class BannerController extends Controller
         }
 
         $banner = Banner::findOrFail($id);
-        $banner->section_id = $request->section_id ? $request->section_id[0] : null;
         $banner->title = $request->title;
         $banner->description = $request->description;
         if($request->hasFile('image')){

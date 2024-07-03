@@ -9,6 +9,16 @@ trait OfferTrait
 {
     public function productAssignToOffer($offer, $productIds)
     {
+        $currentProductIds = OfferProduct::where('offer_id', $offer->id)->pluck('product_id')->toArray();
+
+        $productIdsToDelete = array_diff($currentProductIds, $productIds);
+
+        if (!empty($productIdsToDelete)) {
+            OfferProduct::where('offer_id', $offer->id)
+                ->whereIn('product_id', $productIdsToDelete)
+                ->delete();
+        }
+
         foreach ($productIds as $product) {
             OfferProduct::updateOrCreate(
                 [
@@ -18,13 +28,13 @@ trait OfferTrait
                 [
                     'user_id' => 1
                 ]
-            );
+            ); 
         }
     }
 
     public function offerAssignTosection($offer, $sectionIds)
     {
-        SectionOffer::where('banner_id', $offer->id)->delete();
+        SectionOffer::where('offer_id', $offer->id)->delete();
         foreach ($sectionIds as $section) {
             SectionOffer::create([
                 'section_id' => $section,

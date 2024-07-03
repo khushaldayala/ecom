@@ -4,8 +4,8 @@ namespace App\Http\Controllers\v1\mobile;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Response;
-use DB;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\DB;
 use App\Models\Banner;
 use App\Models\Category;
 use App\Models\Subcategory;

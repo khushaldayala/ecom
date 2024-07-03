@@ -190,6 +190,8 @@ Route::group(array('prefix' => 'v1'), function () {
 
         Route::get('assigned_offer_products/{offer_id}', 'assigned_products')->name('assigned_offer_products');
         Route::get('unassigned_offer_products', 'unassigned_products')->name('unassigned_offer_products');
+
+        Route::get('offer_search', 'search')->name('offer_search');
     });
 
     Route::controller(VariantController::class)->group(function () {
