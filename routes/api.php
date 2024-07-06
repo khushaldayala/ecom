@@ -1,5 +1,6 @@
 <?php
 
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\v1\Mobile\UserController;
@@ -188,8 +189,8 @@ Route::group(array('prefix' => 'v1'), function () {
         Route::get('assigned_offer', 'assigned')->name('assigned_offer');
         Route::get('unassigned_offer', 'unassigned')->name('unassigned_offer');
 
-        Route::get('assigned_offer_products/{offer_id}', 'assigned_products')->name('assigned_offer_products');
-        Route::get('unassigned_offer_products', 'unassigned_products')->name('unassigned_offer_products');
+        Route::post('assigned_offer_products/{offer_id}', 'assigned_products')->name('assigned_offer_products');
+        Route::post('unassigned_offer_products', 'unassigned_products')->name('unassigned_offer_products');
 
         Route::get('offer_search', 'search')->name('offer_search');
     });
@@ -248,6 +249,8 @@ Route::group(array('prefix' => 'v1'), function () {
 
         Route::get('assigned_brand', 'assigned')->name('assigned_brand');
         Route::get('unassigned_brand', 'unassigned')->name('unassigned_brand');
+
+        Route::put('brand_status_update/{brand}', 'statusUpdate')->name('brand_status_update');
     });
 
     Route::controller(SubCategoryController::class)->group(function () {

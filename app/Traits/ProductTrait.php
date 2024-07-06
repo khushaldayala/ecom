@@ -9,7 +9,7 @@ trait ProductTrait
 {
     public function productAssignTosection($product, $sectionIds)
     {
-        SectionProduct::where('banner_id', $product->id)->delete();
+        SectionProduct::where('product_id', $product->id)->delete();
         foreach ($sectionIds as $section) {
             SectionProduct::create([
                 'section_id' => $section,
