@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\v1\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\OfferProductFilterRequest;
 use App\Http\Requests\OfferStoreRequest;
 use App\Http\Requests\OfferUpdateRequest;
 use Illuminate\Http\Request;
@@ -264,22 +265,118 @@ class OfferController extends Controller
         ], 200);
     }
     
-    public function assigned_products($offer_id)
+    public function assigned_products($offer_id, OfferProductFilterRequest $request)
     {
         $productIds = OfferProduct::where('offer_id', $offer_id)->pluck('product_id')->unique()->values()->toArray();
-        $data = Product::with('productImages', 'productVariants', 'productVariants.productVariantImages')->whereIn('id', $productIds)->paginate(10);
+        $query = Product::with('productImages', 'productVariants', 'productVariants.productVariantImages')->whereIn('id', $productIds);
+
+        $filterTypes = $request->input('filterTypes', []);
+        $dateValue = $request->input('dateValue', null);
+        $priceValue = $request->input('priceValue', null);
+        $brandValue = $request->input('brandValue', []);
+        $categoryValue = $request->input('categoryValue', []);
+        $subCategoryValue = $request->input('subCategoryValue', []);
+
+        if (!empty($filterTypes)) {
+            foreach ($filterTypes as $filterType) {
+                switch ($filterType) {
+                    case 'brand':
+                        if (!empty($brandValue)) {
+                            $query->whereIn('brand_id', $brandValue);
+                        }
+                        break;
+                    case 'category':
+                        if (!empty($categoryValue)) {
+                            $query->whereIn('category_id', $categoryValue);
+                        }
+                        break;
+                    case 'subcategory':
+                        if (!empty($subCategoryValue)) {
+                            $query->whereIn('subcategory_id', $subCategoryValue);
+                        }
+                        break;
+                    case 'price':
+                        if (!is_null($priceValue)) {
+                            $query->whereHas('productVariants', function ($q) use ($priceValue) {
+                                $q->whereBetween('original_price', [$priceValue['min'], $priceValue['max']]);
+                            });
+                        }
+                        break;
+                    case 'date':
+                        if (!is_null($dateValue)) {
+                            $startDate = $dateValue['startdate'];
+                            $endDate = $dateValue['enddate'];
+                            $query->whereBetween('created_at', [$startDate, $endDate]);
+                        }
+                        break;
+                    default:
+                        // Handle unexpected filter types if necessary
+                        break;
+                }
+            }
+        }
+
+        $data = $query->paginate(10);
 
         return Response::json([
-            'status' => '200',
-            'message' => 'Assigned products list.',
-            'data' => $data
-        ], 200);
+                'status' => '200',
+                'message' => 'Assigned products list.',
+                'data' => $data
+            ], 200);
     }
 
-    public function unassigned_products()
+    public function unassigned_products(OfferProductFilterRequest $request)
     {
         $productIds = OfferProduct::pluck('product_id')->unique()->values()->toArray();
-        $data = Product::with('productImages', 'productVariants', 'productVariants.productVariantImages')->whereNotIn('id', $productIds)->paginate(10);
+        $query = Product::with('productImages', 'productVariants', 'productVariants.productVariantImages')->whereNotIn('id', $productIds);
+
+        $filterTypes = $request->input('filterTypes', []);
+        $dateValue = $request->input('dateValue', null);
+        $priceValue = $request->input('priceValue', null);
+        $brandValue = $request->input('brandValue', []);
+        $categoryValue = $request->input('categoryValue', []);
+        $subCategoryValue = $request->input('subCategoryValue', []);
+
+        if (!empty($filterTypes)) {
+            foreach ($filterTypes as $filterType) {
+                switch ($filterType) {
+                    case 'brand':
+                        if (!empty($brandValue)) {
+                            $query->whereIn('brand_id', $brandValue);
+                        }
+                        break;
+                    case 'category':
+                        if (!empty($categoryValue)) {
+                            $query->whereIn('category_id', $categoryValue);
+                        }
+                        break;
+                    case 'subcategory':
+                        if (!empty($subCategoryValue)) {
+                            $query->whereIn('subcategory_id', $subCategoryValue);
+                        }
+                        break;
+                    case 'price':
+                        if (!is_null($priceValue)) {
+                            $query->whereHas('productVariants', function ($q) use ($priceValue) {
+                                $q->whereBetween('original_price', [$priceValue['min'], $priceValue['max']]);
+                            });
+                        }
+                        break;
+                    case 'date':
+                        if (!is_null($dateValue)) {
+                            $startDate = $dateValue['startdate'];
+                            $endDate = $dateValue['enddate'];
+                            $query->whereBetween('created_at', [$startDate, $endDate]);
+                        }
+                        break;
+                    default:
+                        // Handle unexpected filter types if necessary
+                        break;
+                }
+            }
+        }
+
+        $data = $query->paginate(10);
 
         return Response::json([
             'status' => '200',

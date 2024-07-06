@@ -25,7 +25,7 @@ class Offer extends Model
 
     public function offer_products()
     {
-        $this->hasMany(OfferProduct::class);
+        return $this->hasMany(OfferProduct::class);
     }
 
     public function section_offers()

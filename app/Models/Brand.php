@@ -17,6 +17,9 @@ class Brand extends Model
         'created_at',
         'updated_at'
     ];
+
+    protected $fillable = ['title', 'description', 'image', 'keyword', 'status', 'link'];
+
     public function section()
     {
         return $this->belongsTo(Section::class);

@@ -18,7 +18,16 @@ class BrandController extends Controller
     use BrandTrait;
     
     public function brands(){
-        $brand = Brand::all();
+        $brand = Brand::with('products')->get();
+
+        $brand->each(function ($brand) {
+            $brand->product_count = $brand->products->filter(function ($brandProduct) {
+                return $brandProduct !== null;
+            })->count();
+
+            $brand->makeHidden('products');
+        });
+
         if($brand){
             return Response::json([
                 'status' => '200',
@@ -49,11 +58,16 @@ class BrandController extends Controller
         $brand->description = $request->description;
         $brand->image = $name;
         $brand->keyword = $keyword;
+        $brand->link = $request->link;
         $brand->status = $request->status;
         $brand->save();
 
+        if ($request->product_ids) {
+            $this->productAssignToBrand($brand, $request->product_ids);
+        }
+
         if ($request->section_id) {
-            $this->bannerAssignTosection($brand, $request->section_id);
+            $this->brandAssignTosection($brand, $request->section_id);
         }
 
         if($brand){
@@ -69,7 +83,8 @@ class BrandController extends Controller
         }
     }
     public function get_single_brand($id){
-        $brand = Brand::with('section_brands.section')->findorfail($id);
+        $brand = Brand::with('section_brands.section', 'products', 'products.productImages', 'products.productVariants', 'products.productVariants.productVariantImages')->findorfail($id);
+       
         if($brand){
             return Response::json([
                 'status' => '200',
@@ -104,12 +119,17 @@ class BrandController extends Controller
         if($request->hasFile('image')){
             $brand->image = $name;
         }
+        $brand->link = $request->link;
         $brand->keyword = $keyword;
         $brand->status = $request->status;
         $brand->save();
 
         if ($request->section_id) {
-            $this->bannerAssignTosection($brand, $request->section_id);
+            $this->brandAssignTosection($brand, $request->section_id);
+        }
+
+        if ($request->product_ids) {
+            $this->productAssignToBrand($brand, $request->product_ids);
         }
 
         if($brand){
@@ -233,6 +253,23 @@ class BrandController extends Controller
             'status' => '200',
             'message' => 'Unassigned brand list.',
             'data' => $data
+        ], 200);
+    }
+
+    public function statusUpdate(Brand $brand)
+    {
+        if($brand->status == 'active')
+        {
+            $status = 'inactive';
+        } else {
+            $status = 'active';
+        }
+
+        $brand->update(['status' => $status]);
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'Brand status updated successfully.',
         ], 200);
     }
 }
