@@ -23,6 +23,8 @@ class Section extends Model
         'updated_at'
     ];
 
+    protected $fillable = ['user_id', 'title', 'description', '	keywords', 'keyword_option', 'end_point', 'order', 'dlink', 'status'];
+
     public function products()
     {
         return $this->hasMany(Product::class);

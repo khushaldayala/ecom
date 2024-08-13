@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use App\Models\SectionBanner;
+use Illuminate\Support\Facades\Auth;
 
 trait BannerTrait
 {
@@ -10,11 +11,14 @@ trait BannerTrait
     {
         SectionBanner::where('banner_id', $banner->id)->delete();
         foreach ($sectionIds as $section) {
-            SectionBanner::create([
-                'section_id' => $section,
-                'banner_id' => $banner->id,
-                'user_id' => 1
-            ]);
+            if($section)
+            {
+                SectionBanner::create([
+                    'section_id' => $section,
+                    'banner_id' => $banner->id,
+                    'user_id' => Auth::id()
+                ]);
+            }
         }
     }
 }

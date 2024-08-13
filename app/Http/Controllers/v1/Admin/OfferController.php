@@ -7,52 +7,68 @@ use App\Http\Requests\OfferProductFilterRequest;
 use App\Http\Requests\OfferStoreRequest;
 use App\Http\Requests\OfferUpdateRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Response;
 use App\Models\Offer;
 use App\Models\OfferProduct;
-use App\Models\Product;
 use App\Models\SectionOffer;
 use App\Traits\OfferTrait;
+use Illuminate\Support\Facades\Auth;
 
 class OfferController extends Controller
 {
     use OfferTrait;
 
-    public function offers(){
-        $offer = Offer::with('offer_product.product')->get();
-        
-        $offer->each(function ($offer) {
+    public function offers(Request $request)
+    {
+        $userId = Auth::id();
+        $sort = $request->input('sort');
+        $search = $request->input('search');
+        $isActive = filter_var($request->input('is_active'), FILTER_VALIDATE_BOOLEAN);
+
+        $offers = Offer::with('offer_product.product')->where('user_id', $userId);
+
+        if ($search) {
+            $offers = $offers->where('title', 'LIKE', '%' . $search . '%');
+        }
+
+        if ($sort) {
+            $sortOrder = ($sort === 'asc') ? 'asc' : 'desc';
+            $offers = $offers->withCount('offer_product')->orderBy('offer_product_count', $sortOrder);
+        } else {
+            $offers = $offers->withCount('offer_product');
+        }
+
+        if ($isActive) {
+            $offers = $offers->get();
+        } else {
+            $offers = $offers->paginate();
+        }
+
+        // Add product count to each offer
+        $offers->each(function ($offer) {
             $offer->product_count = $offer->offer_product->filter(function ($offerProduct) {
                 return $offerProduct->product !== null;
             })->count();
         });
-
-
-        if($offer){
-            return Response::json([
-                'status' => '200',
-                'message' => 'Offers list get successfully',
-                'data' => $offer
-            ], 200);
-        }else{
-            return Response::json([
-                'status' => '404',
-                'message' => 'Offers data not found'
-            ], 404);
-        }
+       
+        return Response::json([
+            'status' => '200',
+            'message' => 'Filter products list.',
+            'data' => $offers
+        ], 200);
     }
+
     public function store(OfferStoreRequest $request){
-        
+
         $image = $request->file('image');
-
         $name = time().'.'.$image->getClientOriginalExtension();
-
         $destinationPath = public_path('/images/offers');
-
         $image->move($destinationPath,$name);
 
+        $userId = Auth::id();
+
         $offer = new Offer;
+        $offer->user_id = $userId;
         $offer->title = $request->title;
         $offer->description = $request->description;
         $offer->image = $name;
@@ -66,55 +82,63 @@ class OfferController extends Controller
             $this->productAssignToOffer($offer, $request->product_ids);
         }
 
-        if ($request->section_id) {
-            $this->offerAssignTosection($offer, $request->section_id);
-        }
+        // if ($request->section_id) {
+        //     $this->offerAssignTosection($offer, $request->section_id);
+        // }
 
-        if($offer){
-            return Response::json([
-                'status' => '200',
-                'message' => 'offer data has been saved'
-            ], 200);
-        }else{
-            return Response::json([
-                'status' => '401',
-                'message' => 'offer data has been not saved'
-            ], 401);
-        }
+        return Response::json([
+            'status' => '200',
+            'message' => 'offer data has been saved'
+        ], 200);
     }
-    public function get_single_offer($id){
-        $offer = Offer::with('section_offers.section', 'offer_product.product', 'offer_product.product.productImages', 'offer_product.product.productVariants', 'offer_product.product.productVariants.productVariantImages')->findorfail($id);
-        if($offer){
-            $offerProductCount = $offer->offer_product->count();
-            return Response::json([
-                'status' => '200',
-                'message' => 'Offer data get successfully',
-                'offer_product_count' => $offerProductCount,
-                'data' => $offer,
-            ], 200);
-        }else{
-            return Response::json([
-                'status' => '404',
-                'message' => 'Offer data not found'
-            ], 404);
-        }
-    }
-    public function update(OfferUpdateRequest $request, $id){
+    public function get_single_offer(Offer $offer){
+
+        $assignedProductIds = $offer->offer_products->pluck('product_id')->toArray();
+
+        $offer = $offer->load([
+            'section_offers.section',
+            'offer_product' => function ($query) {
+                $query->take(10)->with([
+                    'product' => function ($query) {
+                        $query->with([
+                            'productImages',
+                            'productVariants' => function ($query) {
+                                $query->with('productVariantImages');
+                            }
+                        ]);
+                    }
+                ]);
+            }
+        ]);
+
+        $offerProductCount = $offer->offer_product->count();
         
-        if($request->hasFile('image')){
+        return Response::json([
+            'status' => '200',
+            'message' => 'Offer data get successfully',
+            'offer_product_count' => $offerProductCount,
+            'data' => $offer,
+            'assigned_product_ids' => $assignedProductIds
+        ], 200);
+    }
+    public function update(OfferUpdateRequest $request, Offer $offer)
+    {
+        $typeChanged = $offer->type !== $request->type;
+        $discountChanged = $offer->discount !== $request->discount;
+
+        if ($request->hasFile('image')) {
             $image = $request->file('image');
-
-            $name = time().'.'.$image->getClientOriginalExtension();
-
+            $name = time() . '.' . $image->getClientOriginalExtension();
             $destinationPath = public_path('/images/offers');
-
-            $image->move($destinationPath,$name);
+            $image->move($destinationPath, $name);
         }
 
-        $offer = Offer::find($id);
+        $userId = Auth::id();
+
+        $offer->user_id = $userId;
         $offer->title = $request->title;
         $offer->description = $request->description;
-        if($request->hasFile('image')){
+        if ($request->hasFile('image')) {
             $offer->image = $name;
         }
         $offer->type = $request->type;
@@ -122,103 +146,76 @@ class OfferController extends Controller
         $offer->status = $request->status;
         $offer->save();
 
-        if ($request->product_ids) {
-            $this->productAssignToOffer($offer, $request->product_ids);
+        if ($typeChanged || $discountChanged) {
+            $offerProductVariants = $offer->productVarients()->get();
+            if ($offerProductVariants) {
+                foreach ($offerProductVariants as $variant) {
+                    $this->updateProductVariantPrice($request->type, $request->discount, $variant);
+                }
+            }
         }
 
-        if($request->section_id)
-        {
-            $this->offerAssignTosection($offer, $request->section_id);
+        if (is_array($request->assigned_product_ids) && isset($request->assigned_product_ids)) {
+            $this->productAssignToOffer($offer, $request->assigned_product_ids);
+        } else {
+            OfferProduct::where('offer_id', $offer->id)
+                ->delete();
         }
 
-        if($offer){
-            return Response::json([
-                'status' => '200',
-                'message' => 'offer data has been Updated'
-            ], 200);
-        }else{
-            return Response::json([
-                'status' => '401',
-                'message' => 'offer data has been not Updated'
-            ], 401);
-        }
+        // $this->offerAssignTosection($offer, $request->section_id);
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'offer data has been Updated'
+        ], 200);
     }
-    public function delete($id){
-        OfferProduct::where('offer_id', $id)->delete();
-        $offer = Offer::find($id);
+    public function delete(Offer $offer){
+        OfferProduct::where('offer_id', $offer->id)->delete();
         $offer->delete();
-        if($offer){
-            return Response::json([
-                'status' => '200',
-                'message' => 'Offer move to trash successfully'
-            ], 200);
-        }else{
-            return Response::json([
-                'status' => '401',
-                'message' => 'Offer has been not move in trash'
-            ], 401);
-        }
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'Offer move to trash successfully'
+        ], 200);
     }
 
     // Trash data section
     public function trash_offer(){
-        $offer = Offer::onlyTrashed()->get();
-        if($offer){
-            return Response::json([
-                'status' => '200',
-                'message' => 'Trash Offers list get successfully',
-                'data' => $offer
-            ], 200);
-        }else{
-            return Response::json([
-                'status' => '404',
-                'message' => 'Trash Offers data not found'
-            ], 404);
-        }
+        $userId = Auth::id();
+        $offer = Offer::where('user_id', $userId)->onlyTrashed()->paginate(10);
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'Trash Offers list get successfully',
+            'data' => $offer
+        ], 200);
     }
-    public function trash_offer_restore($id){
-        $offer = Offer::onlyTrashed()->findOrFail($id);
+    public function trash_offer_restore($offer){
+        $offer = Offer::onlyTrashed()->findOrFail($offer);
         $offer->restore();
-        if($offer){
-            return Response::json([
-                'status' => '200',
-                'message' => 'Offer restored successfully'
-            ], 200);
-        }else{
-            return Response::json([
-                'status' => '401',
-                'message' => 'Offer has been not restored'
-            ], 401);
-        }
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'Offer restored successfully'
+        ], 200);
     }
-    public function trash_offer_delete($id){
-        $offer = Offer::onlyTrashed()->findOrFail($id);
+    public function trash_offer_delete($offer){
+        $offer = Offer::onlyTrashed()->findOrFail($offer);
         $offer->forceDelete();
-        if($offer){
-            return Response::json([
-                'status' => '200',
-                'message' => 'Trash Offer deleted successfully'
-            ], 200);
-        }else{
-            return Response::json([
-                'status' => '401',
-                'message' => 'Offer has been not deleted'
-            ], 401);
-        }
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'Trash Offer deleted successfully'
+        ], 200);
     }
     public function all_trash_offer_delete(){
-        $offer = Offer::onlyTrashed()->forceDelete();
-        if($offer){
-            return Response::json([
-                'status' => '200',
-                'message' => 'All Trash Offers deleted successfully'
-            ], 200);
-        }else{
-            return Response::json([
-                'status' => '401',
-                'message' => 'Offers has been not deleted'
-            ], 401);
-        }
+        $userId = Auth::id();
+        Offer::onlyTrashed()->where('user_id', $userId)->forceDelete();
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'All Trash Offers deleted successfully'
+        ], 200);
     }
 
     public function remove_offer_section(SectionOffer $section)
@@ -265,125 +262,93 @@ class OfferController extends Controller
         ], 200);
     }
     
-    public function assigned_products($offer_id, OfferProductFilterRequest $request)
+    public function filterProducts(OfferProductFilterRequest $request)
     {
-        $productIds = OfferProduct::where('offer_id', $offer_id)->pluck('product_id')->unique()->values()->toArray();
-        $query = Product::with('productImages', 'productVariants', 'productVariants.productVariantImages')->whereIn('id', $productIds);
-
-        $filterTypes = $request->input('filterTypes', []);
-        $dateValue = $request->input('dateValue', null);
-        $priceValue = $request->input('priceValue', null);
-        $brandValue = $request->input('brandValue', []);
-        $categoryValue = $request->input('categoryValue', []);
-        $subCategoryValue = $request->input('subCategoryValue', []);
-
-        if (!empty($filterTypes)) {
-            foreach ($filterTypes as $filterType) {
-                switch ($filterType) {
-                    case 'brand':
-                        if (!empty($brandValue)) {
-                            $query->whereIn('brand_id', $brandValue);
-                        }
-                        break;
-                    case 'category':
-                        if (!empty($categoryValue)) {
-                            $query->whereIn('category_id', $categoryValue);
-                        }
-                        break;
-                    case 'subcategory':
-                        if (!empty($subCategoryValue)) {
-                            $query->whereIn('subcategory_id', $subCategoryValue);
-                        }
-                        break;
-                    case 'price':
-                        if (!is_null($priceValue)) {
-                            $query->whereHas('productVariants', function ($q) use ($priceValue) {
-                                $q->whereBetween('original_price', [$priceValue['min'], $priceValue['max']]);
-                            });
-                        }
-                        break;
-                    case 'date':
-                        if (!is_null($dateValue)) {
-                            $startDate = $dateValue['startdate'];
-                            $endDate = $dateValue['enddate'];
-                            $query->whereBetween('created_at', [$startDate, $endDate]);
-                        }
-                        break;
-                    default:
-                        // Handle unexpected filter types if necessary
-                        break;
-                }
-            }
+        $type = $request->type;
+        $itemId = $request->id;
+        
+        $data = [];
+        if($type == 'assign')
+        {
+            $data = $this->assignedProducts($itemId, $request);
+        }else if($type == 'unassign') {
+            $data = $this->unassignedProducts($request);
+        } else {
+            $data = $this->commonProducts($request);
         }
-
-        $data = $query->paginate(10);
-
-        return Response::json([
-                'status' => '200',
-                'message' => 'Assigned products list.',
-                'data' => $data
-            ], 200);
-    }
-
-    public function unassigned_products(OfferProductFilterRequest $request)
-    {
-        $productIds = OfferProduct::pluck('product_id')->unique()->values()->toArray();
-        $query = Product::with('productImages', 'productVariants', 'productVariants.productVariantImages')->whereNotIn('id', $productIds);
-
-        $filterTypes = $request->input('filterTypes', []);
-        $dateValue = $request->input('dateValue', null);
-        $priceValue = $request->input('priceValue', null);
-        $brandValue = $request->input('brandValue', []);
-        $categoryValue = $request->input('categoryValue', []);
-        $subCategoryValue = $request->input('subCategoryValue', []);
-
-        if (!empty($filterTypes)) {
-            foreach ($filterTypes as $filterType) {
-                switch ($filterType) {
-                    case 'brand':
-                        if (!empty($brandValue)) {
-                            $query->whereIn('brand_id', $brandValue);
-                        }
-                        break;
-                    case 'category':
-                        if (!empty($categoryValue)) {
-                            $query->whereIn('category_id', $categoryValue);
-                        }
-                        break;
-                    case 'subcategory':
-                        if (!empty($subCategoryValue)) {
-                            $query->whereIn('subcategory_id', $subCategoryValue);
-                        }
-                        break;
-                    case 'price':
-                        if (!is_null($priceValue)) {
-                            $query->whereHas('productVariants', function ($q) use ($priceValue) {
-                                $q->whereBetween('original_price', [$priceValue['min'], $priceValue['max']]);
-                            });
-                        }
-                        break;
-                    case 'date':
-                        if (!is_null($dateValue)) {
-                            $startDate = $dateValue['startdate'];
-                            $endDate = $dateValue['enddate'];
-                            $query->whereBetween('created_at', [$startDate, $endDate]);
-                        }
-                        break;
-                    default:
-                        // Handle unexpected filter types if necessary
-                        break;
-                }
-            }
-        }
-
-        $data = $query->paginate(10);
 
         return Response::json([
             'status' => '200',
-            'message' => 'Unassigned products list.',
+            'message' => 'Filter products list.',
             'data' => $data
         ], 200);
     }
+
+    // public function unassigned_products(OfferProductFilterRequest $request)
+    // {
+    //     $productIds = OfferProduct::pluck('product_id')->unique()->values()->toArray();
+    //     $query = Product::with('productImages', 'productVariants', 'productVariants.productVariantImages')->whereNotIn('id', $productIds);
+
+    //     $filterTypes = $request->input('filterTypes', []);
+    //     $dateValue = $request->input('dateValue', null);
+    //     $priceValue = $request->input('priceValue', null);
+    //     $brandValue = $request->input('brandValue', []);
+    //     $categoryValue = $request->input('categoryValue', []);
+    //     $subCategoryValue = $request->input('subCategoryValue', []);
+
+    //     if (!empty($filterTypes)) {
+    //         foreach ($filterTypes as $filterType) {
+    //             switch ($filterType) {
+    //                 case 'brand':
+    //                     if (!empty($brandValue)) {
+    //                         $query->whereIn('brand_id', $brandValue);
+    //                     }
+    //                     break;
+    //                 case 'category':
+    //                     if (!empty($categoryValue)) {
+    //                         $query->whereIn('category_id', $categoryValue);
+    //                     }
+    //                     break;
+    //                 case 'subcategory':
+    //                     if (!empty($subCategoryValue)) {
+    //                         $query->whereIn('subcategory_id', $subCategoryValue);
+    //                     }
+    //                     break;
+    //                 case 'price':
+    //                     if (!is_null($priceValue)) {
+    //                         $query->whereHas('productVariants', function ($q) use ($priceValue) {
+    //                             $q->whereBetween('original_price', [$priceValue['min'], $priceValue['max']]);
+    //                         });
+    //                     }
+    //                     break;
+    //                 case 'date':
+    //                     if (!is_null($dateValue)) {
+    //                         $startDate = $dateValue['startdate'];
+    //                         $endDate = $dateValue['enddate'];
+    //                         $query->whereBetween('created_at', [$startDate, $endDate]);
+    //                     }
+    //                     break;
+    //                 default:
+    //                     // Handle unexpected filter types if necessary
+    //                     break;
+    //             }
+    //         }
+    //     }
+
+    //     if($request->search)
+    //     {
+    //         $data = $query->where('product_name', 'LIKE', '%' . $request->search . '%')
+    //             ->paginate(10);
+    //     } else {
+    //         $data = $query->paginate(10);
+    //     }
+
+    //     return Response::json([
+    //         'status' => '200',
+    //         'message' => 'Unassigned products list.',
+    //         'data' => $data
+    //     ], 200);
+    // }
     
     public function search(Request $request)
     {
@@ -406,5 +371,21 @@ class OfferController extends Controller
         ],
             200
         );
+    }
+
+    public function statusUpdate(Offer $offer)
+    {
+        if ($offer->status == 'active') {
+            $status = 'inactive';
+        } else {
+            $status = 'active';
+        }
+
+        $offer->update(['status' => $status]);
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'Offer status updated successfully.',
+        ], 200);
     }
 }

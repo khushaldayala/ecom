@@ -26,9 +26,7 @@ class SubCategoryStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'category_id' => 'required',
-
-            'fabric_id' => 'required',
+            'category_id' => 'required|integer|exists:categories,id',
 
             'sub_title' => 'required',
 

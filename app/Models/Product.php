@@ -22,6 +22,17 @@ class Product extends Model
         'updated_at'
     ];
 
+    protected $fillable = [
+        'user_id',
+        'category_id',
+        'subcategory_id',
+        'brand_id',
+        'wishlist',
+        'product_name',
+        'description',
+        'status',
+    ];
+
     public function section()
     {
         return $this->belongsTo(Section::class);

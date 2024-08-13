@@ -6,7 +6,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class FilterUpdateRequest extends FormRequest
+class IntroSctreenStoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -27,7 +27,8 @@ class FilterUpdateRequest extends FormRequest
     {
         return [
             'title' => 'required',
-            'display_name' => 'required',
+            'image' => 'required',
+            'order' => 'required|unique:intro_screens,order',
             'status' => 'required'
         ];
     }

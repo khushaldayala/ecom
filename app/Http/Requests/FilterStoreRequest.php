@@ -26,7 +26,9 @@ class FilterStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'title' => 'required'
+            'title' => 'required',
+            'display_name' => 'required',
+            'status' => 'required'
         ];
     }
 

@@ -20,9 +20,11 @@ class Category extends Model
         'deleted_at'
     ];
 
+    protected $fillable = ['user_id', 'title', 'description', 'image', 'status'];
+
     public function products()
     {
-        return $this->hasMany(Product::class, Subcategory::class);
+        return $this->hasMany(Product::class);
     }
     public function section()
     {

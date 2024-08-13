@@ -22,7 +22,7 @@ class UserFactory extends Factory
             'birthdate' => '01-01-2000',
             'gender' => 'male',
             'image' => '6456446454645.jpg',
-            phone_number => '7096895211',
+            'phone_number' => '7096895211',
             'otp' => '1234',
             'status' => 'active',
             'version' => 'android',

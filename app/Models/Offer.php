@@ -18,6 +18,9 @@ class Offer extends Model
         'updated_at',
         'deleted_at'
     ];
+
+    protected $fillable = ['title', 'description', 'type', 'image', 'discount', 'status'];
+
     public function section()
     {
         return $this->belongsTo(Section::class);
@@ -36,5 +39,10 @@ class Offer extends Model
     public function offer_product()
     {
         return $this->hasMany(OfferProduct::class)->select('id', 'product_id', 'offer_id');
+    }
+
+    public function productVarients()
+    {
+        return $this->hasMany(ProductVariant::class);
     }
 }
