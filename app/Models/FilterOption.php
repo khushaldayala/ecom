@@ -12,6 +12,8 @@ class FilterOption extends Model
 
     use SoftDeletes;
 
+    protected $fillable = ['filter_id', 'value1', 'value2'];
+
     protected $hidden = [
         'created_at',
         'updated_at'

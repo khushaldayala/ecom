@@ -3,124 +3,107 @@
 namespace App\Http\Controllers\v1\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\FilterStoreRequest;
+use App\Http\Requests\FilterUpdateRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Filter;
-use Response;
+use App\Traits\AttributeTrait;
+use Illuminate\Support\Facades\Response;
 
 class FilterController extends Controller
 {
+    use AttributeTrait;
+
     public function filters(){
-        $filter = Filter::all();
+        $filter = Filter::with('attributes')->paginate(10);
         if($filter){
             return Response::json([
                 'status' => '200',
-                'message' => 'Filters list get successfully',
+                'message' => 'Attributes list get successfully',
                 'data' => $filter
             ], 200);
         }else{
             return Response::json([
                 'status' => '404',
-                'message' => 'Filters data not found'
+                'message' => 'Attributes data not found'
             ], 404);
         }
     }
-    public function store(Request $request){
-        $validator = Validator::make(request()->all(), [
+    public function store(FilterStoreRequest $request){
+        $filter = new Filter;
+        $filter->title = $request->title;
+        $filter->display_name = $request->display_name;
+        $filter->status = $request->status;
+        $filter->save();
 
-            'title'=>'required'
+        if(isset($request->attributeValue) && $request->attributeValue)
+        {
+            $this->addAttributesValue($filter, $request);
+        }
 
-        ]);
-
-        if ($validator->fails()) {
+        if($filter){
             return Response::json([
-                'status' => '422',
-                'message' => 'Title are requeired'
-            ], 422);
-
+                'filter_id' => $filter->id,
+                'status' => '201',
+                'message' => 'Attribute created successfully'
+            ], 201);
         }else{
-            $filter = new Filter;
-            $filter->title = $request->title;
-            $filter->description = $request->description;
-            $filter->status = $request->status;
-            $filter->save();
-
-            if($filter){
-                return Response::json([
-                    'filter_id' => $filter->id,
-                    'status' => '201',
-                    'message' => 'Filter created successfully'
-                ], 201);
-            }else{
-                return Response::json([
-                    'status' => '401',
-                    'message' => 'Filter create request fail'
-                ], 401);
-            }
+            return Response::json([
+                'status' => '401',
+                'message' => 'Attribute create request fail'
+            ], 401);
         }
     }
     public function get_single_filter($id){
-        $filter = Filter::findorfail($id);
+        $filter = Filter::with('attributes')->findorfail($id);
         if($filter){
             return Response::json([
                 'status' => '200',
-                'message' => 'Filter data get successfully',
+                'message' => 'Attribute data get successfully',
                 'data' => $filter
             ], 200);
         }else{
             return Response::json([
                 'status' => '404',
-                'message' => 'Filter data not found'
+                'message' => 'Attribute data not found'
             ], 404);
         }
     }
-    public function update(Request $request, $id){
+    public function update(FilterUpdateRequest $request, $id){
+        $filter = Filter::find($id);
+        $filter->title = $request->title;
+        $filter->display_name = $request->display_name;
+        $filter->status = $request->status;
+        $filter->save();
 
-        $validator = Validator::make(request()->all(), [
+        $this->updateAttributesValue($filter, $request);
 
-            'title'=>'required'
-
-        ]);
-
-        if ($validator->fails()) {
+        if($filter){
             return Response::json([
-                'status' => '422',
-                'message' => 'Title are requeired'
-            ], 422);
-
+                'status' => '201',
+                'message' => 'Attribute updated successfully'
+            ], 201);
         }else{
-            $filter = Filter::find($id);
-            $filter->title = $request->title;
-            $filter->description = $request->description;
-            $filter->status = $request->status;
-            $filter->save();
-
-            if($filter){
-                return Response::json([
-                    'status' => '201',
-                    'message' => 'Filter updated successfully'
-                ], 201);
-            }else{
-                return Response::json([
-                    'status' => '401',
-                    'message' => 'Filter updated request fail'
-                ], 401);
-            }
+            return Response::json([
+                'status' => '401',
+                'message' => 'Attribute updated request fail'
+            ], 401);
         }
     }
     public function delete($id){
         $filter = Filter::find($id);
+        $filter->attributes()->delete();
         $filter->delete();
-        $filter->filteroptions()->delete();
         if($filter){
             return Response::json([
                 'status' => '200',
-                'message' => 'Filter data move to trash successfully'
+                'message' => 'Attribute data move to trash successfully'
             ], 200);
         }else{
             return Response::json([
                 'status' => '401',
-                'message' => 'Filter data has been not move in trash'
+                'message' => 'Attribute data has been not move in trash'
             ], 401);
         }
     }
@@ -131,13 +114,13 @@ class FilterController extends Controller
         if($filter){
             return Response::json([
                 'status' => '200',
-                'message' => 'Trash filter list get successfully',
+                'message' => 'Trash Attribute list get successfully',
                 'data' => $filter
             ], 200);
         }else{
             return Response::json([
                 'status' => '404',
-                'message' => 'Trash filter data not found'
+                'message' => 'Trash Attribute data not found'
             ], 404);
         }
     }
@@ -147,12 +130,12 @@ class FilterController extends Controller
         if($filter){
             return Response::json([
                 'status' => '200',
-                'message' => 'Filter data restored successfully'
+                'message' => 'Attribute data restored successfully'
             ], 200);
         }else{
             return Response::json([
                 'status' => '401',
-                'message' => 'Filter data has been not restored'
+                'message' => 'Attribute data has been not restored'
             ], 401);
         }
     }
@@ -162,12 +145,12 @@ class FilterController extends Controller
         if($filter){
             return Response::json([
                 'status' => '200',
-                'message' => 'Trash Filter data deleted successfully'
+                'message' => 'Trash Attribute data deleted successfully'
             ], 200);
         }else{
             return Response::json([
                 'status' => '401',
-                'message' => 'Filter data has been not deleted'
+                'message' => 'Attribute data has been not deleted'
             ], 401);
         }
     }
@@ -176,12 +159,12 @@ class FilterController extends Controller
         if($filter){
             return Response::json([
                 'status' => '200',
-                'message' => 'All Trash filter deleted successfully'
+                'message' => 'All Trash Attributes deleted successfully'
             ], 200);
         }else{
             return Response::json([
                 'status' => '401',
-                'message' => 'filter has been not deleted'
+                'message' => 'Attributes has been not deleted'
             ], 401);
         }
     }

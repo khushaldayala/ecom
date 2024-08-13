@@ -30,9 +30,9 @@ class BannerStoreRequest extends FormRequest
 
             'image' => 'required',
 
-            'showtype' => 'required',
+            'schedule_start_date' => 'nullable|date|after:today',
 
-            'status' => 'required'
+            'schedule_end_date' => 'nullable|date|after:schedule_start_date'
         ];
     }
 

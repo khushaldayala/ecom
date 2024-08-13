@@ -4,29 +4,36 @@ namespace App\Traits;
 
 use App\Models\OfferProduct;
 use App\Models\SectionProduct;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 trait ProductTrait
 {
     public function productAssignTosection($product, $sectionIds)
     {
-        SectionProduct::where('banner_id', $product->id)->delete();
+        SectionProduct::where('product_id', $product->id)->delete();
         foreach ($sectionIds as $section) {
             SectionProduct::create([
                 'section_id' => $section,
                 'product_id' => $product->id,
-                'user_id' => 1
+                'user_id' => Auth::id()
             ]);
         }
     }
 
     public function productAssignToOffer($product, $offerIds)
     {
-        foreach ($offerIds as $offer) {
-            OfferProduct::create([
-                'offer_id' => $offer,
-                'product_id' => $product->id,
-                'user_id' => 1
-            ]);
-        }
+        if($offerIds)
+        {
+            OfferProduct::updateOrCreate(
+            [
+                'offer_id' => $offerIds,
+                'product_id' => $product->id
+            ],
+            [
+                'user_id' => Auth::id()
+                ]
+            );
+        }       
     }
 }

@@ -3,44 +3,38 @@
 namespace App\Http\Controllers\v1\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\IntroSctreenStoreRequest;
+use App\Http\Requests\IntroSctreenUpdateRequest;
 use Illuminate\Http\Request;
 use App\Models\IntroScreen;
-use Response;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Response;
 
 class IntroScreenController extends Controller
 {
     public function handle(){
-        $introscreen_order = IntroScreen::pluck('order');
-        if($introscreen_order){
-            return Response::json([
-                'status' => '200',
-                'message' => 'IntroScreens Orders no get successfully',
-                'data' => $introscreen_order
-            ], 200);
-        }else{
-            return Response::json([
-                'status' => '404',
-                'message' => 'No existing order numbers found.'
-            ], 404);
-        }
+        $userId = Auth::id();
+        $introscreen_order = IntroScreen::where('user_id', $userId)->pluck('order');
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'IntroScreens Orders no get successfully',
+            'data' => $introscreen_order
+        ], 200);
     }
     public function intro_screens(){
-        $introscreen = IntroScreen::all();
-        if($introscreen){
-            return Response::json([
-                'status' => '200',
-                'message' => 'IntroScreens list get successfully',
-                'data' => $introscreen
-            ], 200);
-        }else{
-            return Response::json([
-                'status' => '404',
-                'message' => 'IntroScreens data not found'
-            ], 404);
-        }
+        $userId = Auth::id();
+        $introscreen = IntroScreen::where('user_id', $userId)->get();
+        
+        return Response::json([
+            'status' => '200',
+            'message' => 'IntroScreens list get successfully',
+            'data' => $introscreen
+        ], 200);
     }
-    public function store(Request $request){
+    public function store(IntroSctreenStoreRequest $request){
 
+        $userId = Auth::id();
         $image = $request->file('image');
 
         $name = time().'.'.$image->getClientOriginalExtension();
@@ -50,41 +44,31 @@ class IntroScreenController extends Controller
         $image->move($destinationPath,$name);
 
         $intro = new IntroScreen;
+        $intro->user_id = $userId;
         $intro->title = $request->title;
         $intro->description = $request->description;
         $intro->image = $name;
         $intro->order = $request->order;
         $intro->status = $request->status;
         $intro->save();
-        if($intro){
-            return Response::json([
-                'status' => '200',
-                'message' => 'Intro screen data has been saved'
-            ], 200);
-        }else{
-            return Response::json([
-                'status' => '401',
-                'message' => 'Intro screen data has been not saved'
-            ], 401);
-        }
-    }
-    public function get_single_intro_screen($id){
-        $introScreen = IntroScreen::findorfail($id);
-        if($introScreen){
-            return Response::json([
-                'status' => '200',
-                'message' => 'Introscreen data get successfully',
-                'data' => $introScreen
-            ], 200);
-        }else{
-            return Response::json([
-                'status' => '404',
-                'message' => 'Introscreen data not found'
-            ], 404);
-        }
-    }
-    public function update(Request $request, $id){
 
+        return Response::json([
+            'status' => '200',
+            'message' => 'Intro screen data has been saved'
+        ], 200);
+    }
+
+    public function get_single_intro_screen(IntroScreen $introScreen){
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'Introscreen data get successfully',
+            'data' => $introScreen
+        ], 200);
+    }
+    public function update(IntroSctreenUpdateRequest $request, $id){
+
+        $userId = Auth::id();
         if($request->hasFile('image')){
             $image = $request->file('image');
 
@@ -96,6 +80,7 @@ class IntroScreenController extends Controller
         };
 
         $intro = IntroScreen::find($id);
+        $intro->user_id = $userId;
         $intro->title = $request->title;
         $intro->description = $request->description;
         if($request->hasFile('image')){
@@ -104,92 +89,57 @@ class IntroScreenController extends Controller
         $intro->order = $request->order;
         $intro->status = $request->status;
         $intro->save();
-        if($intro){
-            return Response::json([
-                'status' => '200',
-                'message' => 'Intro screen data has been updated'
-            ], 200);
-        }else{
-            return Response::json([
-                'status' => '401',
-                'message' => 'Intro screen data has been not updated'
-            ], 401);
-        }
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'Intro screen data has been updated'
+        ], 200);
     }
-    public function delete($id){
-        $introScreen = IntroScreen::find($id);
+    public function delete(IntroScreen $introScreen){
         $introScreen->delete();
-        if($introScreen){
-            return Response::json([
-                'status' => '200',
-                'message' => 'Intro screen data move to trash successfully'
-            ], 200);
-        }else{
-            return Response::json([
-                'status' => '401',
-                'message' => 'Intro screen data has been not move in trash'
-            ], 401);
-        }
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'Intro screen data move to trash successfully'
+        ], 200);
     }
 
     // Trash data section
     public function trash_intro_screen(){
-        $introScreen = IntroScreen::onlyTrashed()->get();
-        if($introScreen){
-            return Response::json([
-                'status' => '200',
-                'message' => 'Trash introscreens list get successfully',
-                'data' => $introScreen
-            ], 200);
-        }else{
-            return Response::json([
-                'status' => '404',
-                'message' => 'Trash introscreens data not found'
-            ], 404);
-        }
+        $userId = Auth::id();
+        $introScreen = IntroScreen::where('user_id', $userId)->onlyTrashed()->get();
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'Trash introscreens list get successfully',
+            'data' => $introScreen
+        ], 200);
     }
-    public function trash_intro_screen_restore($id){
-        $introScreen = IntroScreen::onlyTrashed()->findOrFail($id);
+    public function trash_intro_screen_restore($introScreen){
+        $introScreen = IntroScreen::onlyTrashed()->findOrFail($introScreen);
         $introScreen->restore();
-        if($introScreen){
-            return Response::json([
-                'status' => '200',
-                'message' => 'introscreen data restored successfully'
-            ], 200);
-        }else{
-            return Response::json([
-                'status' => '401',
-                'message' => 'introscreen data has been not restored'
-            ], 401);
-        }
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'introscreen data restored successfully'
+        ], 200);
     }
-    public function trash_intro_screen_delete($id){
-        $introScreen = IntroScreen::onlyTrashed()->findOrFail($id);
+    public function trash_intro_screen_delete($introScreen){
+        $introScreen = IntroScreen::onlyTrashed()->findOrFail($introScreen);
         $introScreen->forceDelete();
-        if($introScreen){
-            return Response::json([
-                'status' => '200',
-                'message' => 'Trash intro screen data deleted successfully'
-            ], 200);
-        }else{
-            return Response::json([
-                'status' => '401',
-                'message' => 'intro screen data has been not deleted'
-            ], 401);
-        }
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'Trash intro screen data deleted successfully'
+        ], 200);
     }
     public function all_trash_intro_screen_delete(){
-        $introScreen = IntroScreen::onlyTrashed()->forceDelete();
-        if($introScreen){
-            return Response::json([
-                'status' => '200',
-                'message' => 'All Trash intro screen deleted successfully'
-            ], 200);
-        }else{
-            return Response::json([
-                'status' => '401',
-                'message' => 'intro screen has been not deleted'
-            ], 401);
-        }
+        $userId = Auth::id();
+        IntroScreen::where('user_id', $userId)->onlyTrashed()->forceDelete();
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'All Trash intro screen deleted successfully'
+        ], 200);
     }
 }

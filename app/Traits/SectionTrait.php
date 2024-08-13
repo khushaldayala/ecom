@@ -8,6 +8,7 @@ use App\Models\SectionBrand;
 use App\Models\SectionCategory;
 use App\Models\SectionOffer;
 use App\Models\SectionProduct;
+use Illuminate\Support\Facades\Auth;
 
 trait SectionTrait
 {
@@ -21,7 +22,7 @@ trait SectionTrait
                     SectionProduct::create([
                         'section_id' => $section->id,
                         'product_id' => $item,
-                        'user_id' => 1
+                        'user_id' => Auth::id()
                     ]);
                 }
                 break;
@@ -31,7 +32,7 @@ trait SectionTrait
                     SectionOffer::create([
                         'section_id' => $section->id,
                         'offer_id' => $item,
-                        'user_id' => 1
+                        'user_id' => Auth::id()
                     ]);
                 }
                 break;
@@ -41,7 +42,7 @@ trait SectionTrait
                     SectionCategory::create([
                         'section_id' => $section->id,
                         'category_id' => $item,
-                        'user_id' => 1
+                        'user_id' => Auth::id()
                     ]);
                 }
                 break;
@@ -51,7 +52,7 @@ trait SectionTrait
                     SectionBrand::create([
                         'section_id' => $section->id,
                         'brand_id' => $item,
-                        'user_id' => 1
+                        'user_id' => Auth::id()
                     ]);
                 }
                 break;
@@ -61,7 +62,7 @@ trait SectionTrait
                     SectionBanner::create([
                         'section_id' => $section->id,
                         'banner_id' => $item,
-                        'user_id' => 1
+                        'user_id' => Auth::id()
                     ]);
                 }
                 break;
@@ -71,7 +72,7 @@ trait SectionTrait
                     SectionAdvertise::create([
                         'section_id' => $section->id,
                         'advertise_id' => $item,
-                        'user_id' => 1
+                        'user_id' => Auth::id()
                     ]);
                 }
                 break;
@@ -118,31 +119,34 @@ trait SectionTrait
         try {
             switch ($section->keywords) {
                 case 'Product':
-                    return $section->load(
+                    $items = $section->load(
                         'section_products.product',
                         'section_products.product.productImages',
                         'section_products.product.productVariants',
                         'section_products.product.productVariants.productVariantImages');
                     break;
                 case 'Offer':
-                    return $section->load('section_offers.offer');
+                    $items = $section->load('section_offers.offer');
                     break;
                 case 'Categories':
-                    return $section->load('section_categories.category');
+                    $items = $section->load('section_categories.category');
                     break;
                 case 'Brand':
-                    return $section->load('section_brands.brand');
+                    $items = $section->load('section_brands.brand');
                     break;
                 case 'SliderBanner':
-                    return $section->load('section_banners.banner');
+                    $items = $section->load('section_banners.banner');
                     break;
                 case 'Advertise':
-                    return $section->load('section_advertise.advertise');
+                    $items = $section->load('section_advertise.advertise');
                     break;
                 default:
+                $items = [];
                     // Handle default case
                     break;
             }
+
+            return $items->toArray();
         } catch (\Exception $e) {
             // Handle the exception, log it, or return an error response
             return response()->json(['error' => 'Something went wrong.']);
@@ -170,6 +174,38 @@ trait SectionTrait
                     break;
                 case 'Advertise':
                     return $section->section_advertise()->count();
+                    break;
+                default:
+                    return 0;
+                    break;
+            }
+        } catch (\Exception $e) {
+            // Handle the exception, log it, or return an error response
+            return response()->json(['error' => 'Something went wrong.']);
+        }
+    }
+
+    public function assignedItemsPreview($section)
+    {
+        try {
+            switch ($section->keywords) {
+                case 'Product':
+                    return $section->load('section_products.product');
+                    break;
+                case 'Offer':
+                    return $section->load('section_offers.offer');
+                    break;
+                case 'Categories':
+                    return $section->load('section_categories.category');
+                    break;
+                case 'Brand':
+                    return $section->load('section_brands.brand');
+                    break;
+                case 'SliderBanner':
+                    return $section->load('section_banners.banner');
+                    break;
+                case 'Advertise':
+                    return $section->load('section_advertise.advertise');
                     break;
                 default:
                     return 0;

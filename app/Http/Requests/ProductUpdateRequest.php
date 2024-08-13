@@ -26,7 +26,22 @@ class ProductUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'product_name' => 'required',
+            'category_id' => 'nullable|exists:categories,id',
+            'subcategory_id' => 'nullable|exists:subcategories,id',
+            'brand_id' => 'nullable|exists:brands,id',
+            'product_name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'status' => 'required|in:active,inactive',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'productVariants.*.attribute_id' => 'nullable|exists:attributs,id',
+            'productVariants.*.attribute_option_id' => 'nullable|exists:attribut_options,id',
+            'productVariants.*.offer_id' => 'nullable|exists:offers,id',
+            'productVariants.*.qty' => 'nullable|integer|min:0',
+            'productVariants.*.sku' => 'nullable|string|max:255',
+            'productVariants.*.price' => 'nullable|numeric|min:0',
+            'productVariants.*.original_price' => 'nullable|numeric|min:0',
+            'productVariants.*.off_percentage' => 'nullable|numeric|between:0,100',
+            'productVariants.*.variantImages.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ];
     }
 
