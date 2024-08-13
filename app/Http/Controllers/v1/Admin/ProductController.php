@@ -55,6 +55,8 @@ class ProductController extends Controller
                     $products->orderBy('product_name', 'desc');
                     break;
             }
+        } else {
+            $products->latest();
         }
 
         if ($isActive) {
@@ -313,7 +315,7 @@ class ProductController extends Controller
                         $productvariant->off_price = $offPrice;
                         $productvariant->off_percentage = $offPercentage;
                         $productvariant->original_price = $variants['price'];
-                        $productvariant->discount_price = $discountPrice;
+                        $productvariant->discount_price = $discountPrice < 0 ? 0 : $discountPrice;
                         $productvariant->status = 'active';
                         $productvariant->update();
 
@@ -349,7 +351,7 @@ class ProductController extends Controller
                         $productvariant->off_price = $offPrice;
                         $productvariant->off_percentage = $offPercentage;
                         $productvariant->original_price = $variants['price'];
-                        $productvariant->discount_price = $discountPrice;
+                        $productvariant->discount_price = $discountPrice < 0 ? 0 : $discountPrice;
                         $productvariant->status = 'active';
                         $productvariant->save();
 

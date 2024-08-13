@@ -22,6 +22,7 @@ class OfferController extends Controller
     {
         $userId = Auth::id();
         $sort = $request->input('sort');
+        $sortType = $request->input('sort_type');
         $search = $request->input('search');
         $isActive = filter_var($request->input('is_active'), FILTER_VALIDATE_BOOLEAN);
 
@@ -31,11 +32,18 @@ class OfferController extends Controller
             $offers = $offers->where('title', 'LIKE', '%' . $search . '%');
         }
 
-        if ($sort) {
-            $sortOrder = ($sort === 'asc') ? 'asc' : 'desc';
-            $offers = $offers->withCount('offer_product')->orderBy('offer_product_count', $sortOrder);
+        if ($sortType) {
+            switch ($sortType) {
+                case 'product':
+                    $sortOrder = ($sort === 'asc') ? 'asc' : 'desc';
+                    $offers = $offers->withCount('offer_product')->orderBy('offer_product_count', $sortOrder);
+                    break;
+                case 'name':
+                    $offers->orderBy('title', $sort);
+                    break;
+            }
         } else {
-            $offers = $offers->withCount('offer_product');
+            $offers = $offers->latest();
         }
 
         if ($isActive) {

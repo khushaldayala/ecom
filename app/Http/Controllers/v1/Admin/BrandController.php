@@ -57,6 +57,8 @@ class BrandController extends Controller
                         break;
                 }
             }
+        } else {
+            $brands->latest();
         }
 
         if ($isActive) {

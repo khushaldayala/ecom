@@ -47,6 +47,8 @@ class CategoryController extends Controller
                     $categoryQuery->orderBy('title', $sort);
                     break;
             }
+        } else {
+            $categories = $categoryQuery->latest();
         }
 
         // Fetch the categories based on the active state
@@ -142,9 +144,7 @@ class CategoryController extends Controller
             $this->categoryAssignTosection($category, $request->section_id);
         }
 
-        if ($request->assigned_product_ids) {
-            $this->updateProductAssignToCategory($category, $request->assigned_product_ids);
-        }
+        $this->updateProductAssignToCategory($category, $request->assigned_product_ids);
         
         return Response::json([
             'status' => '200',

@@ -8,7 +8,10 @@ use App\Http\Requests\AttributeUpdateRequest;
 use App\Models\Attribut;
 use App\Models\AttributeCategory;
 use App\Models\AttributeSubCategory;
+use App\Models\AttributOption;
+use App\Models\ProductVariant;
 use App\Models\ProductVariantAttribute;
+use App\Models\ProductVariantImage;
 use App\Traits\AttributeTrait;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Auth;
@@ -35,6 +38,8 @@ class AttributeController extends Controller
             $query = $query->orderBy('id', 'asc');
         } elseif ($sort === 'desc') {
             $query = $query->orderBy('id', 'desc');
+        } else {
+            $query->latest();
         }
 
         if ($isActive) {
@@ -115,13 +120,12 @@ class AttributeController extends Controller
     }
     public function delete(Attribut $attribute)
     {
-        $attributesProduct = ProductVariantAttribute::where('attribute_id', $attribute->id)->get();
-        if (count($attributesProduct) > 0) {
-            return Response::json([
-                'status' => '400',
-                'message' => 'Cannot delete attribute with associated product variants'
-            ], 400);
-        }
+        $variantIds = ProductVariantAttribute::where('attribute_id', $attribute->id)
+        ->distinct()
+        ->pluck('variant_id');
+        
+        ProductVariant::whereIn('id', $variantIds)->delete();
+        ProductVariantImage::whereIn('id', $variantIds)->delete();
         $attribute->attributes()->delete();
         $attribute->delete();
 
@@ -173,6 +177,23 @@ class AttributeController extends Controller
         return Response::json([
             'status' => '200',
             'message' => 'All Trash Attributes deleted successfully'
+        ], 200);
+    }
+
+    public function deleteAttributeOption(AttributOption $attributeOption)
+    {
+        $variantIds = ProductVariantAttribute::where('attribute_option_id', $attributeOption->id)
+        ->distinct()
+        ->pluck('variant_id');
+
+        ProductVariant::whereIn('id', $variantIds)->delete();
+        ProductVariantImage::whereIn('id', $variantIds)->delete();
+        ProductVariantAttribute::where('attribute_option_id', $attributeOption->id)->delete();
+        $attributeOption->delete();
+
+        return Response::json([
+            'status' => '200',
+            'message' => 'Attribute option deleted successfully'
         ], 200);
     }
 }

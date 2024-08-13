@@ -175,6 +175,8 @@ Route::group(array('prefix' => 'v1'), function () {
             Route::get('trash_attribute_restore/{attribute}', 'trash_filter_restore')->name('trash_attribute_restore');
             Route::delete('trash_attribute_delete/{attribute}', 'trash_filter_delete')->name('trash_attribute_delete');
             Route::get('all_trash_attribute_delete', 'all_trash_filter_delete')->name('all_trash_attribute_delete');
+
+            Route::delete('delete_attribute_option/{attributeOption}', 'deleteAttributeOption')->name('delete_attribute_option');
         });
 
         Route::controller(BrandController::class)->group(function () {

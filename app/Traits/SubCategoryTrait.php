@@ -10,12 +10,18 @@ trait SubCategoryTrait
     {
         $currentProductIds = Product::where('subcategory_id', $subcategory->id)->pluck('id')->toArray();
 
-        $productIdsToDelete = array_diff($currentProductIds, $productIds);
+        if (!empty($productIds)) {
+            $productIdsToDelete = array_diff($currentProductIds, $productIds);
+        } else {
+            $productIdsToDelete = $currentProductIds;
+        }
 
         if (!empty($productIdsToDelete)) {
             Product::whereIn('id', $productIdsToDelete)->update(['subcategory_id' => null]);
         }
 
-        Product::whereIn('id', $productIds)->update(['subcategory_id' => $subcategory->id]);
+        if (!empty($productIds)) {
+            Product::whereIn('id', $productIds)->update(['subcategory_id' => $subcategory->id]);
+        }
     }
 }

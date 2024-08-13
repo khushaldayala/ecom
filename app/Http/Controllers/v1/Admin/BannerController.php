@@ -23,7 +23,7 @@ class BannerController extends Controller
         $sort = $request->input('sort');
         $search = $request->input('search');
         $isActive = filter_var($request->input('is_active'), FILTER_VALIDATE_BOOLEAN);
-        
+
         $banner = Banner::where('user_id', $userId);
 
         if ($search) {
@@ -39,6 +39,8 @@ class BannerController extends Controller
                     $banner->orderBy('title', $sort);
                     break;
             }
+        } else {
+            $banner = $banner->latest();
         }
 
         if ($isActive) {
