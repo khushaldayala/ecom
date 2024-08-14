@@ -4,9 +4,7 @@ namespace App\Traits;
 
 use App\Models\OfferProduct;
 use App\Models\Product;
-use App\Models\ProductVariant;
 use App\Models\SectionOffer;
-use Illuminate\Support\Facades\Log;
 
 trait OfferTrait
 {
@@ -33,85 +31,40 @@ trait OfferTrait
             'discount_type' => $discountType
         ]);
     }
-
+    
     public function productAssignToOffer($offer, $productIds)
     {
         $currentProductIds = OfferProduct::where('offer_id', $offer->id)->pluck('product_id')->toArray();
+
         $productIdsToDelete = array_diff($currentProductIds, $productIds);
 
-        $this->deleteProductsFromOffer($offer->id, $productIdsToDelete);
-        $this->addOrUpdateProductsInOffer($offer, $productIds);
-
-        if ($productIds === null) {
-            Log::info('test empty array');
-            ProductVariant::where('offer_id', $offer->id)->update(['offer_id' => null]);
-        }
-    }
-
-    private function deleteProductsFromOffer($offerId, $productIdsToDelete)
-    {
         if (!empty($productIdsToDelete)) {
-            foreach ($productIdsToDelete as $product) {
-                $this->deleteOfferInVariant($product, $offerId);
-            }
-
-            OfferProduct::where('offer_id', $offerId)
+            OfferProduct::where('offer_id', $offer->id)
                 ->whereIn('product_id', $productIdsToDelete)
                 ->delete();
         }
-    }
 
-    private function addOrUpdateProductsInOffer($offer, $productIds)
-    {
-        foreach ($productIds as $productId) {
-            if ($productId) {
-                OfferProduct::updateOrCreate(
-                    [
-                        'product_id' => $productId,
-                        'offer_id' => $offer->id
-                    ],
-                    [
-                        'user_id' => 1
-                    ]
-                );
-
-                $this->updateProductVariants($productId, $offer->id);
-            }
+        foreach ($productIds as $product) {
+            OfferProduct::updateOrCreate(
+                [
+                    'product_id' => $product,
+                    'offer_id' => $offer->id
+                ],
+                [
+                    'user_id' => 1
+                ]
+            ); 
         }
     }
-
-    private function updateProductVariants($productId, $offerId)
-    {
-        $product = Product::find($productId);
-        if ($product) {
-            $productVariants = $product->productVariants()->get();
-
-            if ($productVariants) {
-                foreach ($productVariants as $variant) {
-                    $variant->update(['offer_id' => $offerId]);
-                }
-            }
-        }
-    }
-
-    public function deleteOfferInVariant($product, $offerId)
-    {
-        $productVariants = ProductVariant::where('product_id', $product)->get();
-
-        foreach ($productVariants as $variant) {
-            if ($variant->offer_id == $offerId) {
-                $variant->update(['offer_id' => null]);
-            }
-        }
-    }
-
 
     public function offerAssignTosection($offer, $sectionIds)
     {
         SectionOffer::where('offer_id', $offer->id)->delete();
-        if (count($sectionIds) > 0) {
+        if(count($sectionIds) > 0)
+        {
             foreach ($sectionIds as $section) {
-                if ($section) {
+                if($section)
+                {
                     SectionOffer::create([
                         'section_id' => $section,
                         'offer_id' => $offer->id,
@@ -333,7 +286,7 @@ trait OfferTrait
     {
         $itemId = $request->id;
         $query = Product::with('productImages', 'productVariants', 'productVariants.productVariantImages');
-
+    
         $filterTypes = $request->input('filterTypes', []);
         $dateValue = $request->input('dateValue', null);
         $priceValue = $request->input('priceValue', null);
@@ -341,14 +294,14 @@ trait OfferTrait
         $categoryValue = $request->input('categoryValue', []);
         $subCategoryValue = $request->input('subCategoryValue', []);
         $inventoryValue = $request->input('inventoryValue', null);
-
+    
         // Apply the key-based filter first
         switch ($request->key) {
             case 'brand':
                 if ($itemId) {
                     $query->where(function ($q) use ($itemId) {
                         $q->where('brand_id', $itemId)
-                            ->orWhereNull('brand_id');
+                          ->orWhereNull('brand_id');
                     });
                 } else {
                     $query->whereNull('brand_id');
@@ -358,7 +311,7 @@ trait OfferTrait
                 if ($itemId) {
                     $query->where(function ($q) use ($itemId) {
                         $q->where('category_id', $itemId)
-                            ->orWhereNull('category_id');
+                          ->orWhereNull('category_id');
                     });
                 } else {
                     $query->whereNull('category_id');
@@ -368,7 +321,7 @@ trait OfferTrait
                 if ($itemId) {
                     $query->where(function ($q) use ($itemId) {
                         $q->where('subcategory_id', $itemId)
-                            ->orWhereNull('subcategory_id');
+                          ->orWhereNull('subcategory_id');
                     });
                 } else {
                     $query->whereNull('subcategory_id');
@@ -385,7 +338,7 @@ trait OfferTrait
                 }
                 break;
         }
-
+    
         // Apply the filters
         if (!empty($filterTypes)) {
             foreach ($filterTypes as $filterType) {
@@ -442,23 +395,23 @@ trait OfferTrait
                 }
             }
         }
-
+    
         // Apply search filter
         if ($request->search) {
             $query->where('product_name', 'LIKE', '%' . $request->search . '%');
         }
-
+    
         // Paginate the results
         $data = $query->paginate(10);
-
+    
         $requestKey = $request->key;
-
+    
         // Assign is_assign based on the key
         $data->each(function ($product) use ($requestKey) {
             $status = null;
             $product->is_assign = $status;
         });
-
+    
         return $data;
     }
 }

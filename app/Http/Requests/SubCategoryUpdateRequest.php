@@ -26,7 +26,7 @@ class SubCategoryUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'category_id' => 'required|integer|exists:categories,id',
+            'category_id' => 'required',
 
             'sub_title' => 'required',
 

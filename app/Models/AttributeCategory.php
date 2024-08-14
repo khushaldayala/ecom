@@ -13,9 +13,9 @@ class AttributeCategory extends Model
         'created_at',
         'updated_at',
     ];
-
+    
     protected $fillable = ['attribute_id', 'category_id'];
-
+    
     public function category()
     {
         return $this->belongsTo(Category::class);

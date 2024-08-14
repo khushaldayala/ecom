@@ -13,9 +13,9 @@ class AttributeSubCategory extends Model
         'created_at',
         'updated_at',
     ];
-
+    
     protected $fillable = ['attribute_id', 'sub_category_id'];
-
+    
     public function subcategory()
     {
         return $this->belongsTo(Subcategory::class, 'sub_category_id', 'id');

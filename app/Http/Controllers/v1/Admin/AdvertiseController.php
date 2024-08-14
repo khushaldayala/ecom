@@ -115,7 +115,7 @@ class AdvertiseController extends Controller
     {
         $userId = Auth::id();
         $advertise = Advertise::where('user_id', $userId)->onlyTrashed()->paginate(10);
-        
+
         return Response::json([
             'status' => '200',
             'message' => 'Trash Advertise list get successfully',
@@ -138,7 +138,7 @@ class AdvertiseController extends Controller
         $userId = Auth::id();
         $advertise = Advertise::where('user_id', $userId)->onlyTrashed()->findOrFail($advertise);
         $advertise->forceDelete();
-        
+
         return Response::json([
             'status' => '200',
             'message' => 'Trash Advertise deleted successfully'
@@ -148,12 +148,11 @@ class AdvertiseController extends Controller
     {
         $userId = Auth::id();
         Advertise::where('user_id', $userId)->onlyTrashed()->forceDelete();
-        
+
         return Response::json([
             'status' => '200',
             'message' => 'All Trash Advertises deleted successfully'
         ], 200);
-       
     }
 
     public function remove_advertise_section(SectionAdvertise $section)
@@ -177,7 +176,7 @@ class AdvertiseController extends Controller
             'status' => '200',
             'message' => 'Assigned advertise list.',
             'data' => $data
-        ],200);
+        ], 200);
     }
 
     public function unassigned()

@@ -25,7 +25,7 @@ class OfferProductFilterRequest extends FormRequest
      */
     public function rules()
     {
-        return [
+            return [
             'id' => 'required_if:type,assign',
             'key' => 'required',
             'filterTypes' => 'nullable|array',
@@ -42,10 +42,10 @@ class OfferProductFilterRequest extends FormRequest
             'categoryValue.*' => 'integer|exists:categories,id',
             'subCategoryValue' => 'nullable|array',
             'subCategoryValue.*' => 'integer|exists:subcategories,id',
-            'inventoryValue' => 'nullable|array',
-            'inventoryValue.min' => 'required_with:inventoryValue|numeric',
-            'inventoryValue.max' => 'required_with:inventoryValue|numeric',
-            'inventoryValue.is_sum' => 'required_with:inventoryValue|boolean',
+            // 'inventoryValue' => 'nullable|array',
+            // 'inventoryValue.min' => 'required_if:inventoryValue,!=,null|numeric',
+            // 'inventoryValue.max' => 'required_if:inventoryValue,!=,null|numeric',
+            // 'inventoryValue.is_sum' => 'required_if:inventoryValue,!=,null|boolean',
         ];
     }
 

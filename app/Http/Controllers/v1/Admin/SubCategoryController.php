@@ -30,7 +30,7 @@ class SubCategoryController extends Controller
             $sub_category = $sub_category->where('sub_title', 'LIKE', '%' . $search . '%');
         }
 
-        if ($sortType == 'product') {
+        if($sortType == 'product') {
             if ($sort) {
                 switch ($sort) {
                     case 'asc':
@@ -41,7 +41,7 @@ class SubCategoryController extends Controller
                         break;
                 }
             }
-        } else if ($sortType == 'name') {
+        } else if($sortType == 'name') {
             if ($sort) {
                 switch ($sort) {
                     case 'asc':
@@ -52,22 +52,23 @@ class SubCategoryController extends Controller
                         break;
                 }
             }
-        } else if ($sortType == 'category') {
+        } 
+        else if ($sortType == 'category') {
             if ($sort) {
                 switch ($sort) {
                     case 'asc':
                         $sub_category = SubCategory::withCount('products')
-                            ->join('categories', 'subcategories.category_id', '=', 'categories.id')
-                            ->where('subcategories.user_id', '=', Auth::id())
-                            ->orderBy('categories.title', $sort)
-                            ->select('subcategories.*');
+                        ->join('categories', 'subcategories.category_id', '=', 'categories.id')
+                        ->where('subcategories.user_id', '=', Auth::id())
+                        ->orderBy('categories.title', $sort)
+                        ->select('subcategories.*');
                         break;
                     case 'desc':
                         $sub_category = SubCategory::withCount('products')
-                            ->join('categories', 'subcategories.category_id', '=', 'categories.id')
-                            ->where('subcategories.user_id', '=', Auth::id())
-                            ->orderBy('categories.title', $sort)
-                            ->select('subcategories.*');
+                        ->join('categories', 'subcategories.category_id', '=', 'categories.id')
+                        ->where('subcategories.user_id', '=', Auth::id())
+                        ->orderBy('categories.title', $sort)
+                        ->select('subcategories.*');
                         break;
                 }
             }
@@ -96,17 +97,16 @@ class SubCategoryController extends Controller
         ], 200);
     }
 
-    public function store(SubCategoryStoreRequest $request)
-    {
+    public function store(SubCategoryStoreRequest $request){
 
         $userId = Auth::id();
         $image = $request->file('sub_image');
 
-        $name = time() . '.' . $image->getClientOriginalExtension();
+        $name = time().'.'.$image->getClientOriginalExtension();
 
         $destinationPath = public_path('/images/subcategory');
 
-        $image->move($destinationPath, $name);
+        $image->move($destinationPath,$name);
 
         $subcategory = new Subcategory;
         $subcategory->user_id = $userId;
@@ -127,14 +127,13 @@ class SubCategoryController extends Controller
         ], 200);
     }
 
-    public function get_single_subcategory(Subcategory $subcategory)
-    {
-
+    public function get_single_subcategory(Subcategory $subcategory){
+        
         $assignedProductIds = $subcategory->products->pluck('id')->toArray();
 
         $subcategory = $subcategory->load(['products' => function ($query) {
-            $query->take(500);
-        }, 'products.productImages', 'products.productVariants.productVariantAttribute', 'products.productVariants.productVariantImages']);
+                               $query->take(500);
+                           }, 'products.productImages', 'products.productVariants.productVariantAttribute', 'products.productVariants.productVariantImages']);
 
         return Response::json([
             'status' => '200',
@@ -144,20 +143,19 @@ class SubCategoryController extends Controller
         ], 200);
     }
 
-    public function update(SubCategoryUpdateRequest $request, Subcategory $subcategory)
-    {
-        if ($request->hasFile('sub_image')) {
-
+    public function update(SubCategoryUpdateRequest $request, Subcategory $subcategory){
+        if($request->hasFile('sub_image')){
+            
             $image = $request->file('sub_image');
-
-            $name = time() . '.' . $image->getClientOriginalExtension();
-
+            
+            $name = time().'.'.$image->getClientOriginalExtension();
+            
             $destinationPath = public_path('/images/subcategory');
-
-            $image->move($destinationPath, $name);
+            
+            $image->move($destinationPath,$name);
         }
         $subcategory->category_id = $request->category_id;
-        if ($request->hasFile('sub_image')) {
+        if($request->hasFile('sub_image')){
             $subcategory->sub_image = $name;
         }
         $subcategory->sub_title = $request->sub_title;
@@ -173,9 +171,8 @@ class SubCategoryController extends Controller
         ], 200);
     }
 
-    public function delete(Subcategory $subcategory)
-    {
-        $subcategory->products()->update(['subcategory_id' => null]);
+    public function delete(Subcategory $subcategory){
+        $subcategory->products()->update(['subcategory_id'=>null]);
         $subcategory->delete();
 
         return Response::json([
@@ -185,11 +182,10 @@ class SubCategoryController extends Controller
     }
 
     // Trash data section
-    public function trash_subcategory()
-    {
+    public function trash_subcategory(){
         $userId = Auth::id();
         $sub_category = Subcategory::where('user_id', $userId)->onlyTrashed()->get();
-
+        
         return Response::json([
             'status' => '200',
             'message' => 'Trash Sub-category list get successfully',
@@ -197,8 +193,7 @@ class SubCategoryController extends Controller
         ], 200);
     }
 
-    public function trash_subcategory_restore($subcategory)
-    {
+    public function trash_subcategory_restore($subcategory){
         $sub_category = Subcategory::onlyTrashed()->findOrFail($subcategory);
         $sub_category->restore();
 
@@ -208,8 +203,7 @@ class SubCategoryController extends Controller
         ], 200);
     }
 
-    public function trash_subcategory_delete($subcategory)
-    {
+    public function trash_subcategory_delete($subcategory){
         $sub_category = Subcategory::onlyTrashed()->findOrFail($subcategory);
         $sub_category->forceDelete();
 
@@ -218,9 +212,8 @@ class SubCategoryController extends Controller
             'message' => 'Trash Sub-category deleted successfully'
         ], 200);
     }
-
-    public function all_trash_subcategory_delete()
-    {
+    
+    public function all_trash_subcategory_delete(){
         $userId = Auth::id();
         Subcategory::where('user_id', $userId)->onlyTrashed()->forceDelete();
 
@@ -229,7 +222,7 @@ class SubCategoryController extends Controller
             'message' => 'All Trash Sub-category deleted successfully'
         ], 200);
     }
-
+    
     public function statusUpdate(Subcategory $subcategory)
     {
         if ($subcategory->status == 'active') {
@@ -237,7 +230,7 @@ class SubCategoryController extends Controller
         } else {
             $status = 'active';
         }
-
+        
         $subcategory->update(['status' => $status]);
 
         return Response::json([

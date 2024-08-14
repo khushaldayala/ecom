@@ -13,13 +13,13 @@ class Banner extends Model
 
     use SoftDeletes;
 
-    protected $fillable = ['user_id', 'title', 'description', 'target', 'target_value', 'image', 'showtype', 'status', 'schedule_start_date', 'schedule_end_date'];
-
     protected $hidden = [
         'created_at',
         'updated_at',
         'deleted_at'
     ];
+    
+    protected $fillable = ['user_id', 'title', 'description', 'target', 'target_value', 'image', 'showtype', 'status', 'schedule_start_date', 'schedule_end_date'];
 
     public function section()
     {

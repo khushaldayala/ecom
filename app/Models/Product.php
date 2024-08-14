@@ -21,7 +21,7 @@ class Product extends Model
         'created_at',
         'updated_at'
     ];
-
+    
     protected $fillable = [
         'user_id',
         'category_id',
@@ -30,6 +30,7 @@ class Product extends Model
         'wishlist',
         'product_name',
         'description',
+        'more_info',
         'status',
     ];
 

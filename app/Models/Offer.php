@@ -40,9 +40,9 @@ class Offer extends Model
     {
         return $this->hasMany(OfferProduct::class)->select('id', 'product_id', 'offer_id');
     }
-
+    
     public function productVarients()
     {
-        return $this->hasMany(ProductVariant::class);
+        return $this->hasMany(ProductVariant::class, 'offer_id', 'id');
     }
 }

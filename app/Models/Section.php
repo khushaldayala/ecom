@@ -22,7 +22,7 @@ class Section extends Model
         'created_at',
         'updated_at'
     ];
-
+    
     protected $fillable = ['user_id', 'title', 'description', '	keywords', 'keyword_option', 'end_point', 'order', 'dlink', 'status'];
 
     public function products()

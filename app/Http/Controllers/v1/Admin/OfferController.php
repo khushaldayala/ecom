@@ -27,12 +27,13 @@ class OfferController extends Controller
         $isActive = filter_var($request->input('is_active'), FILTER_VALIDATE_BOOLEAN);
 
         $offers = Offer::with('offer_product.product')->where('user_id', $userId);
-
+    
         if ($search) {
             $offers = $offers->where('title', 'LIKE', '%' . $search . '%');
         }
 
-        if ($sortType) {
+        if($sortType)
+        {
             switch ($sortType) {
                 case 'product':
                     $sortOrder = ($sort === 'asc') ? 'asc' : 'desc';
@@ -90,9 +91,9 @@ class OfferController extends Controller
             $this->productAssignToOffer($offer, $request->product_ids);
         }
 
-        // if ($request->section_id) {
-        //     $this->offerAssignTosection($offer, $request->section_id);
-        // }
+        if ($request->section_id) {
+            $this->offerAssignTosection($offer, $request->section_id);
+        }
 
         return Response::json([
             'status' => '200',
@@ -100,13 +101,12 @@ class OfferController extends Controller
         ], 200);
     }
     public function get_single_offer(Offer $offer){
-
         $assignedProductIds = $offer->offer_products->pluck('product_id')->toArray();
 
         $offer = $offer->load([
             'section_offers.section',
             'offer_product' => function ($query) {
-                $query->take(10)->with([
+                $query->take(500)->with([
                     'product' => function ($query) {
                         $query->with([
                             'productImages',
@@ -129,16 +129,15 @@ class OfferController extends Controller
             'assigned_product_ids' => $assignedProductIds
         ], 200);
     }
-    public function update(OfferUpdateRequest $request, Offer $offer)
-    {
+    public function update(OfferUpdateRequest $request, Offer $offer){
         $typeChanged = $offer->type !== $request->type;
         $discountChanged = $offer->discount !== $request->discount;
-
-        if ($request->hasFile('image')) {
+        
+        if($request->hasFile('image')){
             $image = $request->file('image');
-            $name = time() . '.' . $image->getClientOriginalExtension();
+            $name = time().'.'.$image->getClientOriginalExtension();
             $destinationPath = public_path('/images/offers');
-            $image->move($destinationPath, $name);
+            $image->move($destinationPath,$name);
         }
 
         $userId = Auth::id();
@@ -146,14 +145,14 @@ class OfferController extends Controller
         $offer->user_id = $userId;
         $offer->title = $request->title;
         $offer->description = $request->description;
-        if ($request->hasFile('image')) {
+        if($request->hasFile('image')){
             $offer->image = $name;
         }
         $offer->type = $request->type;
         $offer->discount = $request->discount;
         $offer->status = $request->status;
         $offer->save();
-
+        
         if ($typeChanged || $discountChanged) {
             $offerProductVariants = $offer->productVarients()->get();
             if ($offerProductVariants) {
@@ -163,14 +162,17 @@ class OfferController extends Controller
             }
         }
 
-        if (is_array($request->assigned_product_ids) && isset($request->assigned_product_ids)) {
-            $this->productAssignToOffer($offer, $request->assigned_product_ids);
+        if (is_array($request->assigned_product_ids) && count($request->assigned_product_ids) > 0 && !in_array(null, $request->assigned_product_ids, true)) {
+             $this->productAssignToOffer($offer, $request->assigned_product_ids);
         } else {
             OfferProduct::where('offer_id', $offer->id)
                 ->delete();
         }
 
-        // $this->offerAssignTosection($offer, $request->section_id);
+        if(isset($request->section_id) && $request->section_id)
+        {
+            $this->offerAssignTosection($offer, $request->section_id);
+        }
 
         return Response::json([
             'status' => '200',

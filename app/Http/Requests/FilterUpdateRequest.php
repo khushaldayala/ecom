@@ -26,9 +26,7 @@ class FilterUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'title' => 'required',
-            'display_name' => 'required',
-            'status' => 'required'
+            'title' => 'required'
         ];
     }
 

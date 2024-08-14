@@ -6,16 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AttributeStoreRequest;
 use App\Http\Requests\AttributeUpdateRequest;
 use App\Models\Attribut;
-use App\Models\AttributeCategory;
-use App\Models\AttributeSubCategory;
-use App\Models\AttributOption;
-use App\Models\ProductVariant;
-use App\Models\ProductVariantAttribute;
-use App\Models\ProductVariantImage;
 use App\Traits\AttributeTrait;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use App\Models\AttributOption;
+use App\Models\ProductVariant;
+use App\Models\ProductVariantAttribute;
+use App\Models\ProductVariantImage;
 
 class AttributeController extends Controller
 {
@@ -121,12 +119,13 @@ class AttributeController extends Controller
     public function delete(Attribut $attribute)
     {
         $variantIds = ProductVariantAttribute::where('attribute_id', $attribute->id)
-        ->distinct()
-        ->pluck('variant_id');
-        
+            ->distinct()
+            ->pluck('variant_id');
+
         ProductVariant::whereIn('id', $variantIds)->delete();
         ProductVariantImage::whereIn('id', $variantIds)->delete();
         $attribute->attributes()->delete();
+        ProductVariantAttribute::where('attribute_id', $attribute->id)->delete();
         $attribute->delete();
 
         return Response::json([
@@ -183,8 +182,8 @@ class AttributeController extends Controller
     public function deleteAttributeOption(AttributOption $attributeOption)
     {
         $variantIds = ProductVariantAttribute::where('attribute_option_id', $attributeOption->id)
-        ->distinct()
-        ->pluck('variant_id');
+            ->distinct()
+            ->pluck('variant_id');
 
         ProductVariant::whereIn('id', $variantIds)->delete();
         ProductVariantImage::whereIn('id', $variantIds)->delete();

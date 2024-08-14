@@ -55,6 +55,7 @@ class BannerController extends Controller
             'data' => $banner
         ], 200);
     }
+
     public function store(BannerStoreRequest $request)
     {
         $userId = Auth::id();
@@ -67,8 +68,7 @@ class BannerController extends Controller
 
         $image->move($destinationPath, $name);
 
-        if($request->schedule_start_date)
-        {
+        if ($request->schedule_start_date) {
             $status = 'inactive';
         } else {
             $status = $request->status;
@@ -140,10 +140,10 @@ class BannerController extends Controller
         $banner->schedule_end_date = isset($request->schedule_end_date) && !empty($request->schedule_end_date) ? (new \DateTime($request->schedule_end_date))->format('Y-m-d') : null;
         $banner->save();
 
-        if ($request->section_id) {
+        if (isset($request->section_id) && $request->section_id) {
             $this->bannerAssignTosection($banner, $request->section_id);
         }
-        
+
         return Response::json([
             'status' => '200',
             'message' => 'Banner data updated successfully'
@@ -175,7 +175,7 @@ class BannerController extends Controller
     {
         $banner = Banner::onlyTrashed()->findOrFail($banner);
         $banner->restore();
-        
+
         return Response::json([
             'status' => '200',
             'message' => 'Banner restored successfully'
@@ -238,23 +238,6 @@ class BannerController extends Controller
             'status' => '200',
             'message' => 'Unassigned banner list.',
             'data' => $data
-        ], 200);
-    }
-
-    public function reorder(Request $request)
-    {
-        $sections = $request->input('sections');
-        if (!$sections) {
-            return response()->json(['message' => 'No sections provided'], 400);
-        }
-
-        foreach ($sections as $index => $id) {
-            Banner::where('id', $id)->update(['order' => $index + 1]);
-        }
-
-        return Response::json([
-            'status' => '200',
-            'message' => 'Sections reordered successfully'
         ], 200);
     }
 
