@@ -18,8 +18,8 @@ class CategoryController extends Controller
 {
     use CategoryTrait;
 
-    public function categories(Request $request)
-    {
+    public function categories(Request $request){
+
         $userId = Auth::id();
 
         $sortType = $request->input('sort_type');
@@ -71,7 +71,6 @@ class CategoryController extends Controller
             'data' => $categories
         ], 200);
     }
-
     public function store(CategoryStoreRequest $request){
 
         $userId = Auth::id();
@@ -106,10 +105,9 @@ class CategoryController extends Controller
         ], 200);
     }
     public function get_single_category(Category $category){
-
         $assignedProductIds = $category->products->pluck('id')->toArray();
         $category = $category->load(['section_categories.section', 'products' => function ($query) {
-                               $query->take(10);
+                               $query->take(500);
                            }, 'products.productImages', 'products.productVariants', 'products.productVariants.productVariantImages']);
 
         return Response::json([
@@ -140,7 +138,8 @@ class CategoryController extends Controller
         $category->status = $request->status;
         $category->save();
 
-        if ($request->section_id) {
+        if(isset($request->section_id) && $request->section_id)
+        {
             $this->categoryAssignTosection($category, $request->section_id);
         }
 

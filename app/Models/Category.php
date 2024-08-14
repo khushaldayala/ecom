@@ -19,7 +19,7 @@ class Category extends Model
         'updated_at',
         'deleted_at'
     ];
-
+    
     protected $fillable = ['user_id', 'title', 'description', 'image', 'status'];
 
     public function products()

@@ -31,7 +31,8 @@ trait CategoryTrait
     public function updateProductAssignToCategory($category, $productIds)
     {
         $assignedProductIds = Product::where('category_id', $category->id)->pluck('id')->unique()->values()->toArray();
-        if (is_array($productIds) && $productIds) {
+        if(is_array($productIds) && $productIds) 
+        {
             $productIdsToDelete = array_diff($assignedProductIds, $productIds);
         } else {
             $productIdsToDelete = $assignedProductIds;
@@ -42,7 +43,8 @@ trait CategoryTrait
                 ->update(['Category_id' => null]);
         }
 
-        if (is_array($productIds) && $productIds) {
+        if(is_array($productIds) && $productIds) 
+        {
             Product::whereIn('id', $productIds)->update(['Category_id' => $category->id]);
         }
     }

@@ -23,7 +23,7 @@ class SectionController extends Controller
         foreach ($sections as $section) {
             $sectionCount = $this->assignedItemsCount($section);
             $section->items_count = $sectionCount;
-            $section->items = $this->assignedItems($section);
+            $assignedItems = $this->assignedItems($section)->toArray();
         }
 
         return Response::json([
@@ -190,7 +190,7 @@ class SectionController extends Controller
             'data' => $sections
         ], 200);
     }
-
+    
     public function reorder(Request $request)
     {
         $sections = $request->input('sections');

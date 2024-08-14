@@ -57,11 +57,10 @@ class ActivateProducts extends Command
         DB::table('products')
             ->whereIn('id', $productIdsToActivate)
             ->update(['status' => 'active']);
-
-            // Update the is_done field in product_release_schedules
+            
         DB::table('product_release_schedules')
-            ->whereIn('product_id', $productIdsToActivate)
-            ->update(['is_done' => 'done']);
+        ->whereIn('product_id', $productIdsToActivate)
+        ->update(['is_done' => 'done']);
 
         $this->info('Products activated successfully.');
     }

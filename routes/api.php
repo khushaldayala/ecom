@@ -244,9 +244,7 @@ Route::group(array('prefix' => 'v1'), function () {
 
             Route::get('preview/{section}', 'preview')->name('preview');
             Route::get('preview-all', 'previewAll')->name('preview-all');
-
             Route::post('section-reorder', 'reorder')->name('section-reorder');
-
             Route::put('section_status_update/{section}', 'statusUpdate')->name('section_status_update');
         });
 

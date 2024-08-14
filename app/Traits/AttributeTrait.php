@@ -22,7 +22,7 @@ trait AttributeTrait
 
     public function updateAttributesValue($attribute1, $request)
     {
-        // AttributOption::where('attribut_id', $attribute1->id)->delete();
+        AttributOption::where('attribut_id', $attribute1->id)->delete();
         if(isset($request->attributeValue) && $request->attributeValue)
         {
             foreach ($request->attributeValue as $attribute) {

@@ -5,7 +5,6 @@ namespace App\Traits;
 use App\Models\OfferProduct;
 use App\Models\SectionProduct;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 
 trait ProductTrait
 {
@@ -23,17 +22,16 @@ trait ProductTrait
 
     public function productAssignToOffer($product, $offerIds)
     {
+        OfferProduct::where('product_id', $product->id)->delete();
         if($offerIds)
         {
-            OfferProduct::updateOrCreate(
-            [
-                'offer_id' => $offerIds,
-                'product_id' => $product->id
-            ],
-            [
-                'user_id' => Auth::id()
-                ]
-            );
-        }       
+            foreach ($offerIds as $offer) {
+                OfferProduct::create([
+                    'offer_id' => $offer,
+                    'product_id' => $product->id,
+                    'user_id' => Auth::id()
+                ]);
+            }
+        }
     }
 }

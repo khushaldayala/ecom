@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductStoreRequest;
 use App\Http\Requests\ProductUpdateRequest;
 use App\Models\Offer;
-use App\Models\OfferProduct;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
 use App\Models\Product;
@@ -17,6 +16,7 @@ use App\Models\ProductVariantAttribute;
 use App\Models\SectionProduct;
 use App\Traits\ProductTrait;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
@@ -49,7 +49,7 @@ class ProductController extends Controller
         if ($sort) {
             switch ($sort) {
                 case 'asc':
-                    $products->orderBy('product_name', 'asc');
+                     $products->orderBy('product_name', 'asc');
                     break;
                 case 'desc':
                     $products->orderBy('product_name', 'desc');
@@ -71,7 +71,7 @@ class ProductController extends Controller
             'data' => $products
         ], 200);
     }
-
+    
     public function store(ProductStoreRequest $request)
     {
         DB::beginTransaction();
@@ -86,26 +86,27 @@ class ProductController extends Controller
             $product->wishlist = '0';
             $product->product_name = $request->product_name;
             $product->description = $request->description;
+            $product->more_info = $request->more_info;
             $product->status = $request->status;
             $product->save();
-
+    
             if ($request->section_id) {
                 $this->productAssignTosection($product, $request->section_id);
             }
-
-            // if ($request->offer_id) {
-            //     $this->productAssignToOffer($product, $request->offer_id);
-            // }
-
+    
+            if ($request->offer_id) {
+                $this->productAssignToOffer($product, $request->offer_id);
+            }
+    
             $productId = $product->id;
-
+    
             // Handle product images
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $key => $image) {
                     $name = time() . $key . '.' . $image->getClientOriginalExtension();
                     $destinationPath = public_path('/images/products');
                     $image->move($destinationPath, $name);
-
+    
                     $productImage = new ProductImage;
                     $productImage->product_id = $productId;
                     $productImage->image = $name;
@@ -113,21 +114,16 @@ class ProductController extends Controller
                     $productImage->save();
                 }
             }
-
+    
             // Handle product variants
             if ($request->has('productVariants')) {
                 foreach ($request->productVariants as $index => $variants) {
-
-                    if ($variants['offer_id']) {
-                        $this->productAssignToOffer($product, $variants['offer_id']);
-                    }
-
                     $offer = Offer::find($variants['offer_id']);
                     $discountPrice = null;
                     $discountType = null;
                     $offPrice = null;
                     $offPercentage = null;
-
+    
                     if ($offer) {
                         if ($offer->type != '') {
                             if ($offer->type == 0) {
@@ -143,7 +139,7 @@ class ProductController extends Controller
                             }
                         }
                     }
-
+    
                     $productVariant = new ProductVariant;
                     $productVariant->product_id = $productId;
                     // $productVariant->attribute_id = $variants['attribute_id'];
@@ -159,9 +155,11 @@ class ProductController extends Controller
                     $productVariant->discount_price = $discountPrice < 0 ? 0 : $discountPrice;
                     $productVariant->status = 'active';
                     $productVariant->save();
-
-                    if ($variants['attribute_id']) {
-                        foreach ($variants['attribute_id'] as $key => $attribute) {
+    
+                    if($variants['attribute_id'])
+                    {
+                        foreach($variants['attribute_id'] as $key => $attribute)
+                        {
                             ProductVariantAttribute::create([
                                 'user_id' => Auth::id(),
                                 'variant_id' => $productVariant->id,
@@ -170,15 +168,16 @@ class ProductController extends Controller
                             ]);
                         }
                     }
-
+    
                     // Handle variant images
                     if (isset($variants['variantImages']) && count($variants['variantImages']) > 0) {
+                        // dd($variants['variantImages']);
                         foreach ($variants['variantImages'] as $key => $imageFile) {
                             $image = $imageFile;
                             $name = time() . $index . $key . '.' . $image->getClientOriginalExtension();
                             $destinationPath = public_path('/images/productsVariants');
                             $image->move($destinationPath, $name);
-
+    
                             $productVariantImage = new ProductVariantImage;
                             $productVariantImage->product_variant_id = $productVariant->id;
                             $productVariantImage->image = $name;
@@ -187,22 +186,21 @@ class ProductController extends Controller
                     }
                 }
             }
-
+            
             DB::commit();
 
             return response()->json([
                 'status' => '200',
                 'message' => 'Product data has been saved'
             ], 200);
+            
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'status' => '500',
                 'message' => 'An error occurred while saving the product',
                 'error' => $e->getMessage(),
-            ],
-                500
-            );
+            ], 500);
         }
     }
     public function get_single_product(Product $product)
@@ -234,8 +232,7 @@ class ProductController extends Controller
     public function update(ProductUpdateRequest $request, Product $product)
     {
         DB::beginTransaction();
-
-        try {
+       try {
             $userId = Auth::id();
             $product->user_id = $userId;
             $product->category_id = $request->category_id;
@@ -244,26 +241,27 @@ class ProductController extends Controller
             $product->wishlist = '0';
             $product->product_name = $request->product_name;
             $product->description = $request->description;
+            $product->more_info = $request->more_info;
             $product->status = $request->status;
             $product->update();
-
+        
             if ($request->section_id) {
                 $this->productAssignTosection($product, $request->section_id);
             } else {
                 SectionProduct::where('product_id', $product->id)->delete();
             }
-
-            // $this->productAssignToOffer($product, $request->offer_id);
-
+        
+            $this->productAssignToOffer($product, $request->offer_id);
+        
             $productId = $product->id;
-
+        
             if ($request->hasFile('images')) {
                 foreach ($request->images as $key => $images) {
                     $image = $images;
                     $name = time() . $key . '.' . $image->getClientOriginalExtension();
                     $destinationPath = public_path('/images/products');
                     $image->move($destinationPath, $name);
-
+        
                     $productImage = new ProductImage;
                     $productImage->product_id = $productId;
                     $productImage->image = $name;
@@ -271,24 +269,17 @@ class ProductController extends Controller
                     $productImage->save();
                 }
             }
-
-            // Remove product from offer
-            OfferProduct::where('product_id', $product->id)->delete();
-
+        
             if ($request->has('productVariants')) {
                 ProductVariant::where('product_id', $productId)->delete();
-
+        
                 foreach ($request->productVariants as $index => $variants) {
-                    if ($variants['offer_id']) {
-                        $this->productAssignToOffer($product, $variants['offer_id']);
-                    }
-
                     $offer = Offer::find($variants['offer_id']);
                     $discountPrice = null;
                     $discountType = null;
                     $offPrice = null;
                     $offPercentage = null;
-
+        
                     if ($offer) {
                         if ($offer->type != '') {
                             if ($offer->type == 0) {
@@ -304,11 +295,12 @@ class ProductController extends Controller
                             }
                         }
                     }
-
+        
                     if (isset($variants['productVariantId'])) {
                         $productvariant = ProductVariant::find($variants['productVariantId']);
                         $productvariant->product_id = $productId;
                         $productvariant->offer_id = $variants['offer_id'];
+                        $productvariant->name = $variants['name'];
                         $productvariant->qty = $variants['qty'];
                         $productvariant->sku = $variants['sku'];
                         $productvariant->discount_type = $discountType;
@@ -318,9 +310,9 @@ class ProductController extends Controller
                         $productvariant->discount_price = $discountPrice < 0 ? 0 : $discountPrice;
                         $productvariant->status = 'active';
                         $productvariant->update();
-
+        
                         ProductVariantAttribute::where('variant_id', $variants['productVariantId'])->delete();
-
+        
                         if ($variants['attribute_id']) {
                             foreach ($variants['attribute_id'] as $key => $attribute) {
                                 ProductVariantAttribute::create([
@@ -331,8 +323,8 @@ class ProductController extends Controller
                                 ]);
                             }
                         }
-
-                        if (isset($variants['existing_images'])) {
+                        
+                         if (isset($variants['existing_images'])) {
                             foreach ($variants['existing_images'] as $key => $existingImages) {
                                 ProductVariantImage::create([
                                     'product_variant_id' => $productvariant->id,
@@ -340,11 +332,11 @@ class ProductController extends Controller
                                 ]);
                             }   
                         }
-
                     } else {
                         $productvariant = new ProductVariant;
                         $productvariant->product_id = $productId;
                         $productvariant->offer_id = $variants['offer_id'];
+                        $productvariant->name = $variants['name'];
                         $productvariant->qty = $variants['qty'];
                         $productvariant->sku = $variants['sku'];
                         $productvariant->discount_type = $discountType;
@@ -354,7 +346,7 @@ class ProductController extends Controller
                         $productvariant->discount_price = $discountPrice < 0 ? 0 : $discountPrice;
                         $productvariant->status = 'active';
                         $productvariant->save();
-
+        
                         if (isset($variants['attribute_id'])) {
                             foreach ($variants['attribute_id'] as $key => $attribute) {
                                 ProductVariantAttribute::create([
@@ -365,8 +357,8 @@ class ProductController extends Controller
                                 ]);
                             }
                         }
-
-                        if (isset($variants['existing_images'])) {
+                        
+                         if (isset($variants['existing_images'])) {
                             foreach ($variants['existing_images'] as $key => $existingImages) {
                                 ProductVariantImage::create([
                                     'product_variant_id' => $productvariant->id,
@@ -375,14 +367,14 @@ class ProductController extends Controller
                             }   
                         }
                     }
-
+        
                     if (isset($variants['variantImages']) && count($variants['variantImages']) > 0) {
                         foreach ($variants['variantImages'] as $key => $imageFile) {
                             $image = $imageFile;
                             $name = time() . $index . $key . '.' . $image->getClientOriginalExtension();
                             $destinationPath = public_path('/images/productsVariants');
                             $image->move($destinationPath, $name);
-
+        
                             $productVariant = new ProductVariantImage;
                             $productVariant->product_variant_id = $productvariant->id;
                             $productVariant->image = $name;
@@ -393,12 +385,13 @@ class ProductController extends Controller
             } else {
                 ProductVariant::where('product_id', $productId)->delete();
             }
-
+            
             DB::commit();
             return Response::json([
                 'status' => '200',
                 'message' => 'Product data has been updated'
             ], 200);
+        
         } catch (Exception $e) {
             DB::rollBack();
             return Response::json([
@@ -407,8 +400,9 @@ class ProductController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
-    }
 
+    }
+    
     public function delete_product_image(ProductImage $productImage)
     {
         $productImage->delete();
@@ -557,7 +551,7 @@ class ProductController extends Controller
             'data' => $data
         ], 200);
     }
-
+    
     public function statusUpdate(Product $product)
     {
         if ($product->status == 'active') {

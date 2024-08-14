@@ -9,12 +9,12 @@ class ProductVariant extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['product_id', 'offer_id', 'name', 'discount_type', 'off_price', 'off_percentage', 'original_price', 'discount_price', 'qty', 'sku', 'status'];
-
     protected $hidden = [
         'created_at',
         'updated_at'
     ];
+    
+    protected $fillable = ['product_id', 'offer_id', 'name', 'discount_type', 'off_price', 'off_percentage', 'original_price', 'discount_price', 'qty', 'sku', 'status'];
 
     public function products()
     {
@@ -35,7 +35,7 @@ class ProductVariant extends Model
     {
         return $this->hasMany(ProductVariantImage::class, 'product_variant_id');
     }
-
+    
     public function productVariantAttribute()
     {
         return $this->hasMany(ProductVariantAttribute::class, 'variant_id');

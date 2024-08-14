@@ -12,6 +12,7 @@ trait SubCategoryTrait
 
         if (!empty($productIds)) {
             $productIdsToDelete = array_diff($currentProductIds, $productIds);
+
         } else {
             $productIdsToDelete = $currentProductIds;
         }

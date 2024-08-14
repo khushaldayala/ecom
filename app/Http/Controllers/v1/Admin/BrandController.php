@@ -12,6 +12,7 @@ use App\Models\SectionBrand;
 use App\Traits\BrandTrait;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Str;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 
 class BrandController extends Controller
@@ -83,6 +84,7 @@ class BrandController extends Controller
     }
     public function store(BrandStoreRequest $request)
     {
+
         $userId = Auth::id();
 
         $image = $request->file('image');
@@ -118,11 +120,11 @@ class BrandController extends Controller
     public function get_single_brand(Brand $brand)
     {
         $assignedProductIds = $brand->products->pluck('id')->toArray();
-
+        
         $brand = $brand->load(['section_brands.section', 'products' => function ($query) {
-                               $query->take(10);
+                               $query->take(500);
                            }, 'products.productImages', 'products.productVariants', 'products.productVariants.productVariantImages']);
-
+                           
         return Response::json([
             'status' => '200',
             'message' => 'brand data get successfully',
@@ -158,7 +160,10 @@ class BrandController extends Controller
         $brand->status = $request->status;
         $brand->save();
 
-        $this->brandAssignTosection($brand, $request->section_id);
+        if(isset($request->section_id) && $request->section_id)
+        {
+             $this->brandAssignTosection($brand, $request->section_id);
+        }
 
         $this->productAssignToBrand($brand, $request->assigned_product_ids);
 
@@ -169,6 +174,7 @@ class BrandController extends Controller
     }
     public function delete(Brand $brand)
     {
+        
         $brand->products()->update(['brand_id' => null]);
         $brand->delete();
         

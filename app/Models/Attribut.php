@@ -25,7 +25,7 @@ class Attribut extends Model
     {
         return $this->hasMany(ProductVariant::class, 'attribute_id', 'id');
     }
-
+    
     public function attributeCategories()
     {
         return $this->hasMany(AttributeCategory::class, 'attribute_id', 'id')->select('id', 'category_id', 'attribute_id');

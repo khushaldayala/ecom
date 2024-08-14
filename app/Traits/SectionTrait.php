@@ -119,34 +119,31 @@ trait SectionTrait
         try {
             switch ($section->keywords) {
                 case 'Product':
-                    $items = $section->load(
+                    return $section->load(
                         'section_products.product',
                         'section_products.product.productImages',
                         'section_products.product.productVariants',
                         'section_products.product.productVariants.productVariantImages');
                     break;
                 case 'Offer':
-                    $items = $section->load('section_offers.offer');
+                    return $section->load('section_offers.offer');
                     break;
                 case 'Categories':
-                    $items = $section->load('section_categories.category');
+                    return $section->load('section_categories.category');
                     break;
                 case 'Brand':
-                    $items = $section->load('section_brands.brand');
+                    return $section->load('section_brands.brand');
                     break;
                 case 'SliderBanner':
-                    $items = $section->load('section_banners.banner');
+                    return $section->load('section_banners.banner');
                     break;
                 case 'Advertise':
-                    $items = $section->load('section_advertise.advertise');
+                    return $section->load('section_advertise.advertise');
                     break;
                 default:
-                $items = [];
                     // Handle default case
                     break;
             }
-
-            return $items->toArray();
         } catch (\Exception $e) {
             // Handle the exception, log it, or return an error response
             return response()->json(['error' => 'Something went wrong.']);
