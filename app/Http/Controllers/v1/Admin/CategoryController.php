@@ -151,6 +151,7 @@ class CategoryController extends Controller
         ], 200);
     }
     public function delete(Category $category){
+        SectionCategory::where('category_id', $category->id)->delete();
         $category->subcategory()->update(['category_id'=>null]);
         $category->products()->update(['category_id'=>null]);
         $category->delete();

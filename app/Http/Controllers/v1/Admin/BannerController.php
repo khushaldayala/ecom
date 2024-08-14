@@ -151,6 +151,7 @@ class BannerController extends Controller
     }
     public function delete(Banner $banner)
     {
+        SectionBanner::where('banner_id', $banner->id)->delete();
         $banner->delete();
 
         return Response::json([

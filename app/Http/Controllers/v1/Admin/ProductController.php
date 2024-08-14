@@ -147,6 +147,7 @@ class ProductController extends Controller
                     $productVariant->offer_id = $variants['offer_id'];
                     $productVariant->name = $variants['name'];
                     $productVariant->qty = $variants['qty'];
+                    $productVariant->min_qty = $variants['min_qty'];
                     $productVariant->sku = $variants['sku'];
                     $productVariant->discount_type = $discountType;
                     $productVariant->off_price = $offPrice;
@@ -302,6 +303,7 @@ class ProductController extends Controller
                         $productvariant->offer_id = $variants['offer_id'];
                         $productvariant->name = $variants['name'];
                         $productvariant->qty = $variants['qty'];
+                        $productvariant->min_qty = $variants['min_qty'];
                         $productvariant->sku = $variants['sku'];
                         $productvariant->discount_type = $discountType;
                         $productvariant->off_price = $offPrice;
@@ -338,6 +340,7 @@ class ProductController extends Controller
                         $productvariant->offer_id = $variants['offer_id'];
                         $productvariant->name = $variants['name'];
                         $productvariant->qty = $variants['qty'];
+                        $productvariant->min_qty = $variants['min_qty'];
                         $productvariant->sku = $variants['sku'];
                         $productvariant->discount_type = $discountType;
                         $productvariant->off_price = $offPrice;
@@ -423,6 +426,7 @@ class ProductController extends Controller
     }
     public function delete(Product $product)
     {
+        SectionProduct::where('product_id', $product->id)->delete();
         $product->delete();
 
         return Response::json([
