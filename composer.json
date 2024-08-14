@@ -13,6 +13,7 @@
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
         "paragonie/random_compat": "2.*",
+        "spatie/laravel-permission": "^6.9",
         "twilio/sdk": "^7.3"
     },
     "require-dev": {

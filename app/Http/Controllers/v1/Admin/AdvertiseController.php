@@ -103,6 +103,7 @@ class AdvertiseController extends Controller
     }
     public function delete(Advertise $advertise)
     {
+        SectionAdvertise::where('advertise_id', $advertise->id)->delete();
         $advertise->delete();
         return Response::json([
             'status' => '200',

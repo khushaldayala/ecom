@@ -27,7 +27,7 @@ trait SectionTrait
                 }
                 break;
             case 'Offer':
-                SectionProduct::whereIn('offer_id', $itemsIds)->delete();
+                SectionOffer::whereIn('offer_id', $itemsIds)->delete();
                 foreach ($itemsIds as $item) {
                     SectionOffer::create([
                         'section_id' => $section->id,
@@ -37,7 +37,7 @@ trait SectionTrait
                 }
                 break;
             case 'Categories':
-                SectionProduct::whereIn('category_id', $itemsIds)->delete();
+                SectionCategory::whereIn('category_id', $itemsIds)->delete();
                 foreach ($itemsIds as $item) {
                     SectionCategory::create([
                         'section_id' => $section->id,
@@ -47,7 +47,7 @@ trait SectionTrait
                 }
                 break;
             case 'Brand':
-                SectionProduct::whereIn('brand_id', $itemsIds)->delete();
+                SectionBrand::whereIn('brand_id', $itemsIds)->delete();
                 foreach ($itemsIds as $item) {
                     SectionBrand::create([
                         'section_id' => $section->id,
@@ -57,7 +57,7 @@ trait SectionTrait
                 }
                 break;
             case 'SliderBanner':
-                SectionProduct::whereIn('banner_id', $itemsIds)->delete();
+                SectionBanner::whereIn('banner_id', $itemsIds)->delete();
                 foreach ($itemsIds as $item) {
                     SectionBanner::create([
                         'section_id' => $section->id,
@@ -67,7 +67,7 @@ trait SectionTrait
                 }
                 break;
             case 'Advertise':
-                SectionProduct::whereIn('advertise_id', $itemsIds)->delete();
+                SectionAdvertise::whereIn('advertise_id', $itemsIds)->delete();
                 foreach ($itemsIds as $item) {
                     SectionAdvertise::create([
                         'section_id' => $section->id,

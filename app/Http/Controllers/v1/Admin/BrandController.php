@@ -174,7 +174,7 @@ class BrandController extends Controller
     }
     public function delete(Brand $brand)
     {
-        
+        SectionBrand::where('brand_id', $brand->id)->delete();
         $brand->products()->update(['brand_id' => null]);
         $brand->delete();
         

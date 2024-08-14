@@ -14,7 +14,7 @@ class ProductVariant extends Model
         'updated_at'
     ];
     
-    protected $fillable = ['product_id', 'offer_id', 'name', 'discount_type', 'off_price', 'off_percentage', 'original_price', 'discount_price', 'qty', 'sku', 'status'];
+    protected $fillable = ['product_id', 'offer_id', 'name', 'discount_type', 'off_price', 'off_percentage', 'original_price', 'discount_price', 'qty', 'min_qty', 'sku', 'status'];
 
     public function products()
     {
